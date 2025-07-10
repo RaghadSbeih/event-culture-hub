@@ -4,7 +4,7 @@ from .models import User, Profile
 
 # Create your views here.
 def home(request):
-    return render(request, 'culture_hub/home.html')
+    return render(request, 'home.html')
 
 def register(request):
     errors = {}
@@ -23,7 +23,7 @@ def register(request):
                 last_name=request.POST['last_name'],
             )
             return redirect('login')
-    return render(request, 'culture_hub/register.html', {'errors': errors})
+    return render(request, 'register.html', {'errors': errors})
 
 def login_view(request):
     errors = {}
@@ -39,7 +39,7 @@ def login_view(request):
                     errors['login'] = 'Invalid email or password'
             except User.DoesNotExist:
                 errors['login'] = 'Invalid email or password'
-    return render(request, 'culture_hub/login.html', {'errors': errors})
+    return render(request, 'login.html', {'errors': errors})
 
 def logout_view(request):
     request.session.clear()
