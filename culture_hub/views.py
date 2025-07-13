@@ -64,15 +64,14 @@ def login_view(request):
         return redirect('home')
 
     errors = {}
+    form_data = {}
     if request.method == 'POST':
         errors = User.objects.login_validator(request.POST)
+        form_data = request.POST.dict()
+        form_data.pop('password', None)
+        
         if not errors:
-            try:
-                user = User.objects.get(email=request.POST['email'])
-            except User.DoesNotExist:
-                errors['email'] = "No user found with that email"
-                return render(request, 'login.html', {'errors': errors})
-
+            user = User.objects.get(email=request.POST['email'])
             request.session['user_id'] = user.id
             request.session['user_role'] = (
                 'admin' if user.is_admin else 'organizer' if user.is_organizer else 'user'
@@ -81,7 +80,7 @@ def login_view(request):
 
             return redirect('admin_dashboard' if user.is_admin else 'organizer_dashboard' if user.is_organizer else 'home')
 
-    return render(request, 'login.html', {'errors': errors})
+    return render(request, 'login.html', {'errors': errors, 'form_data': form_data})
 
 def logout_view(request):
     request.session.flush()
