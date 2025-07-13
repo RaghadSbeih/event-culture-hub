@@ -13,7 +13,7 @@ def register(request):
         if not errors:
             hashed_pw = bcrypt.hashpw(request.POST['password'].encode(), bcrypt.gensalt()).decode()
             user = User.objects.create(
-                username=request.POST['email'],
+                username=request.POST['username'],
                 email=request.POST['email'],
                 password=hashed_pw,
             )
@@ -33,7 +33,7 @@ def login_view(request):
             try:
                 user = User.objects.get(email=request.POST['email'])
                 if bcrypt.checkpw(request.POST['password'].encode(), user.password.encode()):
-                    # Set session or login logic here
+                    request.session['user_id'] = user.id
                     return redirect('home')
                 else:
                     errors['login'] = 'Invalid email or password'
@@ -42,5 +42,5 @@ def login_view(request):
     return render(request, 'login.html', {'errors': errors})
 
 def logout_view(request):
-    request.session.clear()
+    request.session.flush()
     return redirect('home')
