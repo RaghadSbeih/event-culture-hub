@@ -30,9 +30,13 @@ class UserManager(models.Manager):
         errors = {}
         user = User.objects.filter(email=postData.get('email')).first()
         if not user:
-            errors['login'] = "Invalid email/password"
-        elif not bcrypt.checkpw(postData.get('password', '').encode(), user.password.encode()):
-            errors['login'] = "Invalid email/password"
+            errors['email'] = "Invalid email/password"
+        else:
+            try:
+                if not bcrypt.checkpw(postData.get('password', '').encode(), user.password.encode()):
+                    errors['password'] = "Invalid email/password"
+            except Exception as e:
+                errors['password'] = "Invalid email/password"
         return errors
 
 class User(models.Model):
