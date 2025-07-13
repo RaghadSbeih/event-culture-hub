@@ -11,7 +11,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700&display=swap" rel="stylesheet">
     <style>
-        html,body {
+        html,
+        body {
             height: 100%;
             margin: 0;
             font-family: 'Montserrat', Arial, sans-serif;
@@ -32,7 +33,7 @@
             font-size: 1.25rem;
             display: flex;
             align-items: center;
-            color: rgb(104, 117, 47);
+            color: #6d7532;
         }
 
         .logo-icon {
@@ -41,47 +42,197 @@
         }
 
         footer {
-            background: #fafcf7;
-            border-top: 2px solid #68752f;
-            padding: 20px 0;
+            background: white;
+            border-top: 3px solid #68752f;
+            padding: 25px 0 20px;
             color: #68752f;
+            box-shadow: 0 -4px 12px rgba(104, 117, 47, 0.1);
+            position: relative;
         }
 
-        .navbar{
-            background-color: #fafcf7;
-            border-bottom: 1px solid #68752f;
+        footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #68752f, transparent);
+        }
+
+        .navbar {
+            background: white;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 6px 24px rgba(109, 117, 50, 0.10), 0 1.5px 0 #dbe6c2;
+            border-bottom: 2px solid #e0e8c0;
+            margin-bottom: 12px;
+            padding-left: 18px;
+            padding-right: 18px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s cubic-bezier(.4, 2, .6, 1);
+        }
+
+        .navbar-brand {
+            transition: transform 0.3s ease;
+        }
+
+        .navbar-brand:hover {
+            transform: scale(1.05);
+        }
+
+        .navbar-nav {
+            align-items: center;
+        }
+
+        .navbar-nav .nav-item {
+            display: flex;
+            align-items: center;
+            margin: 0 4px;
+        }
+
+        .navbar-nav .nav-link {
+            display: flex;
+            align-items: center;
+            height: 100%;
+            color: #6d7532 !important;
+            font-weight: 500;
+            padding: 8px 18px !important;
+            border-radius: 8px;
+            margin: 0 2px;
+            transition: all 0.22s cubic-bezier(.4, 2, .6, 1);
+            position: relative;
+        }
+
+        .navbar-nav .nav-link:hover,
+        .navbar-nav .nav-link:focus {
+            color: #fff !important;
+            background: #a1b64b;
+            box-shadow: 0 2px 8px rgba(161, 182, 75, 0.13);
+            transform: scale(1.07) translateY(-1px);
+        }
+
+        .navbar-nav .nav-link.active,
+        .navbar-nav .nav-link[aria-current="page"] {
+            background: #a1b64b;
+            color: #fff !important;
+            font-weight: 700;
+            box-shadow: 0 3px 12px rgba(161, 182, 75, 0.18);
+            transform: scale(1.09) translateY(-2px);
+        }
+
+        .navbar-toggler {
+            border: 2px solid #a1b64b;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .navbar-toggler:hover {
+            background: #eafbe7;
+        }
+
+        .dropdown-menu {
+            border: 2px solid #a1b64b;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(161, 182, 75, 0.18);
+            background: linear-gradient(135deg, #fafcf7 0%, #eafbe7 100%);
+            margin-top: 8px;
+            padding: 8px 0;
+        }
+
+        .dropdown-item {
+            color: #6d7532;
+            font-weight: 500;
+            padding: 12px 28px;
+            transition: all 0.22s cubic-bezier(.4, 2, .6, 1);
+            border-radius: 8px;
+            margin: 2px 8px;
+        }
+
+        .dropdown-item:hover,
+        .dropdown-item:focus {
+            background: #a1b64b;
+            color: #fff;
+            transform: scale(1.06) translateX(5px);
+            box-shadow: 0 2px 8px rgba(161, 182, 75, 0.12);
         }
 
         footer a {
             color: #68752f;
-            transition: text-decoration 0.2s ease-in-out;
+            transition: all 0.3s ease;
             text-decoration: none;
+            font-weight: 500;
+            padding: 8px 12px;
+            border-radius: 6px;
+            position: relative;
         }
 
         footer a:hover {
-            text-decoration: underline solid #68752f;
+            color: #4a5a1f;
+            background-color: rgba(104, 117, 47, 0.1);
+            transform: translateY(-2px);
+            text-decoration: none;
+        }
+
+        footer a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: #68752f;
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+        }
+
+        footer a:hover::after {
+            width: 80%;
         }
 
         .btn-outline-custom {
-            color: #68752f; 
-            border: 2px solid #68752f; 
-            background-color: transparent;
-            transition: background-color 0.3s ease, color 0.3s ease;
+            color: #a1b64b;
+            border: 2px solid #a1b64b;
+            background-color: #fafcf7;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            padding: 10px 24px;
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(161, 182, 75, 0.06);
+        }
+
+        .btn-outline-custom::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(104, 117, 47, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn-outline-custom:hover::before {
+            left: 100%;
         }
 
         .btn-outline-custom:hover,
         .btn-outline-custom:focus {
-            background-color: #68752f; 
-            color: white;
+            background-color: #a1b64b;
+            color: #fff;
             text-decoration: none;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(161, 182, 75, 0.12);
         }
-
-
     </style>
     {% block extra_head %}{% endblock %}
 </head>
+
 <body>
-    <nav class="navbar navbar-expand-lg navbar-light py-3">
+    <nav class="navbar navbar-expand-lg navbar-light py-2">
         <div class="container-fluid">
             <a class="navbar-brand d-flex align-items-end" href="/">
                 <svg xmlns="http://www.w3.org/2000/svg" id="svg" version="1.1" viewBox="0 0 300 300" width="48px"
@@ -171,7 +322,7 @@
                             fill="#237d45" />
                     </g>
                 </svg>
-                <span class="logo-text">Culture Hub</span>
+                <span class="logo-text">Event & Culture Hub</span>
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
                 aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -182,24 +333,30 @@
                     <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
                     <li class="nav-item"><a class="nav-link" href="/events/">Events</a></li>
                     <li class="nav-item"><a class="nav-link" href="/about/">About</a></li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/dashboard/route/">Dashboard</a>
+                    </li>
                     {% if request.session.user_id %}
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button"
-                        data-bs-toggle="dropdown" aria-expanded="false">
+                            data-bs-toggle="dropdown" aria-expanded="false">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor"
                                 class="bi bi-list" viewBox="0 0 16 16">
                                 <path fill-rule="evenodd"
-                                    d="M2.5 12.5a.5.5 0 0 1 0-1h11a.5.5 0 0 1 0 1h-11zm0-5a.5.5 0 0 1 0-1h11a.5.5 0 0 1 0 1h-11zm0-5a.5.5 0 0 1 0-1h11a.5.5 0 0 1 0 1h-11z"/>
+                                    d="M2.5 12.5a.5.5 0 0 1 0-1h11a.5.5 0 0 1 0 1h-11zm0-5a.5.5 0 0 1 0-1h11a.5.5 0 0 1 0 1h-11zm0-5a.5.5 0 0 1 0-1h11a.5.5 0 0 1 0 1h-11z" />
                             </svg>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownMenuLink">
                             <li><a class="dropdown-item" href="/profile-settings/">Profile Settings</a></li>
                             <li><a class="dropdown-item" href="/manage-bookings/">Manage Bookings</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="/logout/">Logout</a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item" href="/logout/">Log Out</a></li>
                         </ul>
-                    </li>   
-                    {% else %}
+                    </li>
+                    {% endif %}
+                    {% if not request.session.user_id %}
                     <li class="nav-item"><a class="btn btn-outline-custom" href="/login/">Log In</a></li>
                     {% endif %}
                 </ul>

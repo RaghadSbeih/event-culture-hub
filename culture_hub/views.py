@@ -31,7 +31,10 @@ def home(request):
 
 def register(request):
     if request.session.get('user_id'):
-        return redirect('home')
+        if request.session.get('user_role') == 'admin':
+            return redirect('admin_dashboard')
+        else:
+            return redirect('user_dashboard')
 
     errors = {}
     form_data = {}
@@ -56,12 +59,26 @@ def register(request):
                 city=request.POST.get('city', ''),
                 phone_number=request.POST.get('phone_number', ''),
             )
-            return redirect('login')
+            # Log the user in by setting session variables
+            request.session['user_id'] = user.id
+            request.session['user_role'] = (
+                'admin' if user.is_admin else 'organizer' if user.is_organizer else 'user'
+            )
+            request.session['username'] = user.username
+            print('DEBUG REGISTER SESSION:', dict(request.session))
+            # Redirect to the correct dashboard
+            if user.is_admin:
+                return redirect('admin_dashboard')
+            else:
+                return redirect('user_dashboard')
     return render(request, 'register.html', {'errors': errors, 'form_data': form_data})
 
 def login_view(request):
     if request.session.get('user_id'):
-        return redirect('home')
+        if request.session.get('user_role') == 'admin':
+            return redirect('admin_dashboard')
+        else:
+            return redirect('user_dashboard')
 
     errors = {}
     form_data = {}
@@ -85,6 +102,19 @@ def login_view(request):
 def logout_view(request):
     request.session.flush()
     return redirect('home')
+
+@login_required
+def user_dashboard(request):
+    user = User.objects.get(id=request.session['user_id'])
+    user_bookings = EventBooking.objects.filter(user=user).select_related('event').order_by('-created_at')[:5]
+    context = {
+        'user': user,
+        'user_bookings': user_bookings,
+        'total_bookings': EventBooking.objects.filter(user=user).count(),
+        'confirmed_bookings': EventBooking.objects.filter(user=user, status='confirmed').count(),
+        'pending_bookings': EventBooking.objects.filter(user=user, status='pending').count(),
+    }
+    return render(request, 'user_dashboard.html', context)
 
 # ──────────────── Admin Dashboard & Bookings ──────────────── #
 
@@ -187,3 +217,13 @@ def admin_reject_blog(request, blog_id):
         blog.delete()
         messages.error(request, 'Blog rejected and deleted.')
     return redirect('admin_pending_blogs')
+
+def dashboard_route(request):
+    user_id = request.session.get('user_id')
+    user_role = request.session.get('user_role')
+    if not user_id:
+        return redirect('login')
+    if user_role == 'admin':
+        return redirect('admin_dashboard')
+    else:
+        return redirect('user_dashboard')
