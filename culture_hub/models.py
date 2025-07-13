@@ -9,8 +9,8 @@ class UserManager(models.Manager):
         errors = {}
         EMAIL_REGEX = re.compile(r'^[a-zA-Z0-9.+_-]+@[a-zA-Z0-9._-]+\.[a-zA-Z]+$')
         # Username validation
-        if len(postData.get('username', '')) < 5:
-            errors['username'] = "Username must be at least 2 characters"
+        if len(postData.get('username', '')) < 3:
+            errors['username'] = "Username must be at least 3 characters"
         if User.objects.filter(username=postData.get('username', '')).exists():
             errors['username'] = "Username already exists"
         # Email validation
@@ -36,9 +36,9 @@ class UserManager(models.Manager):
         return errors
 
 class User(models.Model):
-    username = models.CharField(max_length=50)
-    email = models.CharField(max_length=100)
-    password = models.CharField(max_length=100)
+    username = models.CharField(max_length=50, unique=True)
+    email = models.EmailField(max_length=100, unique=True)
+    password = models.CharField(max_length=128)
     is_organizer = models.BooleanField(default=False)
     is_admin = models.BooleanField(default=False)
     date_joined = models.DateTimeField(auto_now_add=True)
@@ -65,7 +65,7 @@ class Category(models.Model):
 class Event(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField()
-    poster_image = models.TextField(blank=True, null=True)
+    poster_image = models.ImageField(upload_to='event_posters/', blank=True, null=True)
     date = models.DateField()
     start_time = models.TimeField()
     end_time = models.TimeField()
@@ -83,7 +83,12 @@ class EventBooking(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     event = models.ForeignKey(Event, on_delete=models.CASCADE)
     booking_time = models.DateTimeField()
-    status = models.CharField(max_length=45)
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('confirmed', 'Confirmed'),
+        ('cancelled', 'Cancelled'),
+    ]
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -107,7 +112,7 @@ class Comment(models.Model):
     event = models.ForeignKey(Event, on_delete=models.CASCADE)
 
 class NewsletterSubscriber(models.Model):
-    email = models.CharField(max_length=100)
+    email = models.EmailField(max_length=100, unique=True)
     subscribed_at = models.DateTimeField(auto_now_add=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -115,7 +120,7 @@ class NewsletterSubscriber(models.Model):
 class Blog(models.Model):
     title = models.CharField(max_length=45)
     content = models.TextField()
-    image = models.TextField(blank=True, null=True)
+    image = models.ImageField(upload_to='blog_images/', blank=True, null=True)
     is_approved = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
