@@ -17,22 +17,32 @@
             <div class="mb-3">
                 <label for="username" class="form-label">Username</label>
                 <input type="text" class="form-control" id="username" name="username" placeholder="Enter your username"
-                    required>
+                    required value="{{ form_data.username|default:'' }}">
             </div>
             <div class="mb-3">
                 <label for="first_name" class="form-label">First Name</label>
                 <input type="text" class="form-control" id="first_name" name="first_name" placeholder="Enter your first name"
-                    required>
+                    required value="{{ form_data.first_name|default:'' }}">
             </div>
             <div class="mb-3">
                 <label for="last_name" class="form-label">Last Name</label>
                 <input type="text" class="form-control" id="last_name" name="last_name" placeholder="Enter your last name"
-                    required>
+                    required value="{{ form_data.last_name|default:'' }}">
             </div>
             <div class="mb-3">
                 <label for="email" class="form-label">Email</label>
                 <input type="email" class="form-control" id="email" name="email" placeholder="Enter your email"
-                    required>
+                    required value="{{ form_data.email|default:'' }}">
+            </div>
+            <div class="mb-3">
+                <label for="city" class="form-label">City</label>
+                <input type="text" class="form-control" id="city" name="city" placeholder="Enter your city"
+                    required value="{{ form_data.city|default:'' }}">
+            </div>
+            <div class="mb-3">
+                <label for="phone_number" class="form-label">Phone Number</label>
+                <input type="tel" class="form-control" id="phone_number" name="phone_number" placeholder="Enter your phone number"
+                    required value="{{ form_data.phone_number|default:'' }}">
             </div>
             <div class="mb-3">
                 <label for="password" class="form-label">Password</label>

@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container my-4">
+  <h2 class="mb-4 fw-bold">Booking Details</h2>
+
+  <dl class="row">
+    <dt class="col-sm-3">Booking ID:</dt>
+    <dd class="col-sm-9">{{ booking.id }}</dd>
+
+    <dt class="col-sm-3">Event:</dt>
+    <dd class="col-sm-9">{{ booking.event.title }}</dd>
+
+    <dt class="col-sm-3">User:</dt>
+    <dd class="col-sm-9">{{ booking.user.username }} ({{ booking.user.email }})</dd>
+
+    <dt class="col-sm-3">Status:</dt>
+    <dd class="col-sm-9">
+      {% if booking.status == 'confirmed' %}
+        <span class="badge bg-success">Confirmed</span>
+      {% elif booking.status == 'pending' %}
+        <span class="badge bg-warning text-dark">Pending</span>
+      {% elif booking.status == 'cancelled' %}
+        <span class="badge bg-danger">Cancelled</span>
+      {% else %}
+        <span class="badge bg-secondary">{{ booking.status }}</span>
+      {% endif %}
+    </dd>
+
+    <dt class="col-sm-3">Booked On:</dt>
+    <dd class="col-sm-9">{{ booking.created_at|date:"M d, Y H:i" }}</dd>
+  </dl>
+
+  {% if booking.status == 'pending' %}
+  <div class="mt-4">
+    <form method="post" action="{% url 'booking_confirm' booking.id %}" class="d-inline">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-success me-2">Confirm</button>
+    </form>
+
+    <form method="post" action="{% url 'booking_cancel' booking.id %}" class="d-inline" onsubmit="return confirm('Are you sure you want to cancel this booking?');">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-danger">Cancel</button>
+    </form>
+  </div>
+  {% endif %}
+
+  <div class="mt-3">
+    <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary">Back to Dashboard</a>
+  </div>
+</div>
+{% endblock %}

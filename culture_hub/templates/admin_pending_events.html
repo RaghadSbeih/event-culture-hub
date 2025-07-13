@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container py-4">
+    <h1 class="fw-bold mb-4 text-center">Pending Events</h1>
+
+    {% if pending_events %}
+    <div class="table-responsive shadow-sm rounded-4">
+        <table class="table table-striped mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Title</th>
+                    <th>Organizer</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for event in pending_events %}
+                <tr>
+                    <td>{{ event.title }}</td>
+                    <td>{{ event.organizer.username }}</td>
+                    <td>{{ event.date|date:"M d, Y" }}</td>
+                    <td>
+                        <!-- Approve Form -->
+                        <form action="{% url 'admin_approve_event' event.id %}" method="post" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-success btn-sm">Approve</button>
+                        </form>
+
+                        <!-- Reject Form -->
+                        <form action="{% url 'admin_reject_event' event.id %}" method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to reject this event?');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger btn-sm">Reject</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="alert alert-info text-center">
+        No pending events found.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
