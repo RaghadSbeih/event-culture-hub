@@ -1,20 +1,47 @@
 import bcrypt
-from django.shortcuts import render, redirect
-from .models import User, Profile
+from functools import wraps
+from django.shortcuts import render, redirect, get_object_or_404
+from django.db.models import Sum
+from django.contrib import messages
 
-# Create your views here.
+from .models import User, Profile, Event, EventBooking, Payment, Blog
+
+# ──────────────── Decorators ──────────────── #
+
+def login_required(view_func):
+    @wraps(view_func)
+    def wrapper(request, *args, **kwargs):
+        if not request.session.get('user_id'):
+            return redirect('login')
+        return view_func(request, *args, **kwargs)
+    return wrapper
+
+def admin_required(view_func):
+    @wraps(view_func)
+    def wrapper(request, *args, **kwargs):
+        if request.session.get('user_role') != 'admin':
+            return redirect('home')
+        return view_func(request, *args, **kwargs)
+    return wrapper
+
+# ──────────────── Public Views ──────────────── #
 
 def home(request):
     return render(request, 'home.html')
 
 def register(request):
-    # Redirect logged-in users away from register page
     if request.session.get('user_id'):
         return redirect('home')
 
     errors = {}
+    form_data = {}
     if request.method == 'POST':
         errors = User.objects.registration_validator(request.POST)
+        form_data = request.POST.dict()
+        # Remove passwords from form_data for security reasons
+        form_data.pop('password', None)
+        form_data.pop('confirm_password', None)
+
         if not errors:
             hashed_pw = bcrypt.hashpw(request.POST['password'].encode(), bcrypt.gensalt()).decode()
             user = User.objects.create(
@@ -26,14 +53,13 @@ def register(request):
                 user=user,
                 first_name=request.POST['first_name'],
                 last_name=request.POST['last_name'],
-                city=request.POST['city'],
-                phone_number=request.POST['phone_number'],
+                city=request.POST.get('city', ''),
+                phone_number=request.POST.get('phone_number', ''),
             )
             return redirect('login')
-    return render(request, 'register.html', {'errors': errors})
+    return render(request, 'register.html', {'errors': errors, 'form_data': form_data})
 
 def login_view(request):
-    # Redirect logged-in users away from login page
     if request.session.get('user_id'):
         return redirect('home')
 
@@ -41,26 +67,124 @@ def login_view(request):
     if request.method == 'POST':
         errors = User.objects.login_validator(request.POST)
         if not errors:
-            user = User.objects.get(email=request.POST['email'])
+            try:
+                user = User.objects.get(email=request.POST['email'])
+            except User.DoesNotExist:
+                errors['email'] = "No user found with that email"
+                return render(request, 'login.html', {'errors': errors})
+
             request.session['user_id'] = user.id
-            # Store user role and username in session
-            if user.is_admin:
-                request.session['user_role'] = 'admin'
-            elif user.is_organizer:
-                request.session['user_role'] = 'organizer'
-            else:
-                request.session['user_role'] = 'user'
+            request.session['user_role'] = (
+                'admin' if user.is_admin else 'organizer' if user.is_organizer else 'user'
+            )
             request.session['username'] = user.username
 
-            # Redirect based on role
-            if user.is_admin:
-                return redirect('admin_dashboard')  # replace with your admin dashboard url name
-            elif user.is_organizer:
-                return redirect('organizer_dashboard')  # replace with your organizer dashboard url name
-            else:
-                return redirect('home')
+            return redirect('admin_dashboard' if user.is_admin else 'organizer_dashboard' if user.is_organizer else 'home')
+
     return render(request, 'login.html', {'errors': errors})
 
 def logout_view(request):
     request.session.flush()
     return redirect('home')
+
+# ──────────────── Admin Dashboard & Bookings ──────────────── #
+
+@admin_required
+def admin_dashboard(request):
+    context = {
+        'total_users': User.objects.count(),
+        'total_events': Event.objects.count(),
+        'total_bookings': EventBooking.objects.filter(status='confirmed').count(),
+        'pending_approvals': EventBooking.objects.filter(status='pending').count(),
+        'recent_users': User.objects.order_by('-date_joined')[:5],
+        'recent_bookings': EventBooking.objects.select_related('event', 'user').order_by('-created_at')[:5],
+    }
+    return render(request, 'admin_dashboard.html', context)
+
+@admin_required
+def booking_detail(request, booking_id):
+    booking = get_object_or_404(EventBooking, id=booking_id)
+    return render(request, 'booking_detail.html', {'booking': booking})
+
+@admin_required
+def booking_confirm(request, booking_id):
+    if request.method == 'POST':
+        booking = get_object_or_404(EventBooking, id=booking_id)
+        booking.status = 'confirmed'
+        booking.save()
+        messages.success(request, 'Booking confirmed successfully.')
+    return redirect('booking_detail', booking_id=booking_id)
+
+@admin_required
+def booking_cancel(request, booking_id):
+    if request.method == 'POST':
+        booking = get_object_or_404(EventBooking, id=booking_id)
+        booking.status = 'cancelled'
+        booking.save()
+        messages.success(request, 'Booking cancelled.')
+    return redirect('booking_detail', booking_id=booking_id)
+
+# ──────────────── Organizer Dashboard ──────────────── #
+
+@login_required
+def organizer_dashboard(request):
+    if request.session.get('user_role') != 'organizer':
+        return redirect('home')
+    user = User.objects.get(id=request.session['user_id'])
+    events = Event.objects.filter(organizer=user)
+    return render(request, 'organizer_dashboard.html', {'events': events})
+
+# ──────────────── Admin: Events ──────────────── #
+
+@admin_required
+def admin_pending_events(request):
+    pending_events = Event.objects.filter(is_approved=False)
+    return render(request, 'admin_pending_events.html', {'pending_events': pending_events})
+
+@admin_required
+def admin_approve_event(request, event_id):
+    if request.method == 'POST':
+        event = get_object_or_404(Event, id=event_id)
+        event.is_approved = True
+        event.save()
+        messages.success(request, 'Event approved.')
+    return redirect('admin_pending_events')
+
+@admin_required
+def admin_reject_event(request, event_id):
+    if request.method == 'POST':
+        event = get_object_or_404(Event, id=event_id)
+        event.delete()
+        messages.error(request, 'Event rejected and deleted.')
+    return redirect('admin_pending_events')
+
+# ──────────────── Admin: Users ──────────────── #
+
+@admin_required
+def admin_manage_users(request):
+    users = User.objects.all()
+    return render(request, 'admin_manage_users.html', {'users': users})
+
+# ──────────────── Admin: Blogs ──────────────── #
+
+@admin_required
+def admin_pending_blogs(request):
+    pending_blogs = Blog.objects.filter(is_approved=False)
+    return render(request, 'admin_pending_blogs.html', {'pending_blogs': pending_blogs})
+
+@admin_required
+def admin_approve_blog(request, blog_id):
+    if request.method == 'POST':
+        blog = get_object_or_404(Blog, id=blog_id)
+        blog.is_approved = True
+        blog.save()
+        messages.success(request, 'Blog approved.')
+    return redirect('admin_pending_blogs')
+
+@admin_required
+def admin_reject_blog(request, blog_id):
+    if request.method == 'POST':
+        blog = get_object_or_404(Blog, id=blog_id)
+        blog.delete()
+        messages.error(request, 'Blog rejected and deleted.')
+    return redirect('admin_pending_blogs')
