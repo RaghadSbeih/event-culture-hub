@@ -5,15 +5,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Heritage Hub</title>
+    <title>Event Culture Hub</title>
     {% load static %}
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700&display=swap" rel="stylesheet">
     <style>
-        body {
+        html,body {
+            height: 100%;
+            margin: 0;
             font-family: 'Montserrat', Arial, sans-serif;
             background: #fafcf7;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+        }
+
+        main {
+            flex: 1;
         }
 
         .logo-text {
@@ -28,12 +39,49 @@
             width: 22px;
             height: 22px;
         }
+
+        footer {
+            background: #fafcf7;
+            border-top: 2px solid #68752f;
+            padding: 20px 0;
+            color: #68752f;
+        }
+
+        .navbar{
+            background-color: #fafcf7;
+            border-bottom: 1px solid #68752f;
+        }
+
+        footer a {
+            color: #68752f;
+            transition: text-decoration 0.2s ease-in-out;
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline solid #68752f;
+        }
+
+        .btn-outline-custom {
+            color: #68752f; 
+            border: 2px solid #68752f; 
+            background-color: transparent;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .btn-outline-custom:hover,
+        .btn-outline-custom:focus {
+            background-color: #68752f; 
+            color: white;
+            text-decoration: none;
+        }
+
+
     </style>
     {% block extra_head %}{% endblock %}
 </head>
-
 <body>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light py-3">
+    <nav class="navbar navbar-expand-lg navbar-light py-3">
         <div class="container-fluid">
             <a class="navbar-brand d-flex align-items-end" href="/">
                 <svg xmlns="http://www.w3.org/2000/svg" id="svg" version="1.1" viewBox="0 0 300 300" width="48px"
@@ -134,19 +182,50 @@
                     <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
                     <li class="nav-item"><a class="nav-link" href="/events/">Events</a></li>
                     <li class="nav-item"><a class="nav-link" href="/about/">About</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/contact/">Contact</a></li>
                     {% if request.session.user_id %}
-                    <li class="nav-item"><a class="btn btn-success" href="/logout/">Log Out</a></li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor"
+                                class="bi bi-list" viewBox="0 0 16 16">
+                                <path fill-rule="evenodd"
+                                    d="M2.5 12.5a.5.5 0 0 1 0-1h11a.5.5 0 0 1 0 1h-11zm0-5a.5.5 0 0 1 0-1h11a.5.5 0 0 1 0 1h-11zm0-5a.5.5 0 0 1 0-1h11a.5.5 0 0 1 0 1h-11z"/>
+                            </svg>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownMenuLink">
+                            <li><a class="dropdown-item" href="/profile-settings/">Profile Settings</a></li>
+                            <li><a class="dropdown-item" href="/manage-bookings/">Manage Bookings</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="/logout/">Logout</a></li>
+                        </ul>
+                    </li>   
                     {% else %}
-                    <li class="nav-item"><a class="btn btn-success" href="/login/">Log In</a></li>  
+                    <li class="nav-item"><a class="btn btn-outline-custom" href="/login/">Log In</a></li>
                     {% endif %}
                 </ul>
             </div>
         </div>
     </nav>
+
     <main class="container my-5">
         {% block content %}{% endblock %}
     </main>
+
+    <footer class="py-4">
+        <div class="container">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-center">
+                <div class="mb-2 mb-md-0 text-center text-md-start">
+                    <strong>Email:</strong> contact@culturehub.com
+                </div>
+                <div class="mb-2 mb-md-0 text-center">
+                    <strong>Phone:</strong> +970-599-222-666
+                </div>
+                <div class="text-center text-md-end">
+                    <a href="/terms_Privacy" class="me-3">Terms & Privacy</a>
+                </div>
+            </div>
+        </div>
+    </footer>
     <!-- Bootstrap 5 JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
