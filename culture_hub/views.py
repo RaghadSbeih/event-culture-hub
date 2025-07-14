@@ -29,6 +29,12 @@ def admin_required(view_func):
 def home(request):
     return render(request, 'home.html')
 
+def about(request):
+    return render(request, 'about.html')
+
+def terms_privacy(request):
+    return render(request, 'terms_privacy.html')
+
 def register(request):
     if request.session.get('user_id'):
         if request.session.get('user_role') == 'admin':

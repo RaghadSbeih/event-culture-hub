@@ -11,5 +11,8 @@ db.sqlite3
 # Environment
 .env
 /venv/
+/django-env/.DS_Store
+.DS_Store
 /django-env/
 migrations/
+
