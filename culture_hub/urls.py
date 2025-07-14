@@ -11,6 +11,7 @@ urlpatterns = [
     path('dashboard/', views.user_dashboard, name='user_dashboard'),
     path('dashboard/route/', views.dashboard_route, name='dashboard_route'),
     path('admin/dashboard/', views.admin_dashboard, name='admin_dashboard'),
+    path('organizer/dashboard/', views.organizer_dashboard, name='organizer_dashboard'),
 
     # Admin management URLs
     path('admin/events/pending/', views.admin_pending_events, name='admin_pending_events'),
@@ -23,4 +24,11 @@ urlpatterns = [
     path('admin/blogs/pending/', views.admin_pending_blogs, name='admin_pending_blogs'),
     path('admin/blogs/<int:blog_id>/approve/', views.admin_approve_blog, name='admin_approve_blog'),
     path('admin/blogs/<int:blog_id>/reject/', views.admin_reject_blog, name='admin_reject_blog'),
+
+    path('event/create/', views.create_event, name='create_event'),
+    path('event/<int:event_id>/edit/', views.edit_event, name='edit_event'),
+
+    path('organizer/bookings/', views.organizer_manage_bookings, name='organizer_manage_bookings'),
+    
+
 ]

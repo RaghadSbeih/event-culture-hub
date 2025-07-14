@@ -4,7 +4,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import Sum
 from django.contrib import messages
 
-from .models import User, Profile, Event, EventBooking, Payment, Blog
+from .models import User, Profile, Event, EventBooking, Payment, Blog, Category
 
 # ──────────────── Decorators ──────────────── #
 
@@ -101,7 +101,7 @@ def login_view(request):
             )
             request.session['username'] = user.username
 
-            return redirect('admin_dashboard' if user.is_admin else 'organizer_dashboard' if user.is_organizer else 'home')
+            return redirect('admin_dashboard' if user.is_admin else 'user_dashboard' if user.is_organizer else 'home')
 
     return render(request, 'login.html', {'errors': errors, 'form_data': form_data})
 
@@ -112,7 +112,9 @@ def logout_view(request):
 @login_required
 def user_dashboard(request):
     user = User.objects.get(id=request.session['user_id'])
+
     user_bookings = EventBooking.objects.filter(user=user).select_related('event').order_by('-created_at')[:5]
+    
     context = {
         'user': user,
         'user_bookings': user_bookings,
@@ -120,7 +122,14 @@ def user_dashboard(request):
         'confirmed_bookings': EventBooking.objects.filter(user=user, status='confirmed').count(),
         'pending_bookings': EventBooking.objects.filter(user=user, status='pending').count(),
     }
+
+    # If the user is an organizer, include their events
+    if user.is_organizer:
+        organizer_events = Event.objects.filter(user=user)
+        context['organizer_events'] = organizer_events
+
     return render(request, 'user_dashboard.html', context)
+
 
 # ──────────────── Admin Dashboard & Bookings ──────────────── #
 
@@ -166,7 +175,7 @@ def organizer_dashboard(request):
     if request.session.get('user_role') != 'organizer':
         return redirect('home')
     user = User.objects.get(id=request.session['user_id'])
-    events = Event.objects.filter(organizer=user)
+    events = Event.objects.filter(user=user)
     return render(request, 'organizer_dashboard.html', {'events': events})
 
 # ──────────────── Admin: Events ──────────────── #
@@ -182,7 +191,18 @@ def admin_approve_event(request, event_id):
         event = get_object_or_404(Event, id=event_id)
         event.is_approved = True
         event.save()
-        messages.success(request, 'Event approved.')
+
+        # Promote the user to organizer
+        organizer = event.user
+        if not organizer.is_organizer:
+            organizer.is_organizer = True
+            organizer.save()
+
+        # Update session role only if the logged-in user is the organizer
+        if request.session.get('user_id') == organizer.id:
+            request.session['user_role'] = 'organizer'  # update session role
+
+        messages.success(request, 'Event approved and organizer promoted (if needed).')
     return redirect('admin_pending_events')
 
 @admin_required
@@ -233,3 +253,67 @@ def dashboard_route(request):
         return redirect('admin_dashboard')
     else:
         return redirect('user_dashboard')
+    
+@login_required
+def create_event(request):
+    if request.method == 'POST':
+        user = User.objects.get(id=request.session['user_id'])
+        event = Event.objects.create(
+            title=request.POST['title'],
+            description=request.POST['description'],
+            date=request.POST['date'],
+            start_time=request.POST['start_time'],
+            end_time=request.POST['end_time'],
+            location=request.POST['location'],
+            city=request.POST['city'],
+            is_ticketed='is_ticketed' in request.POST,
+            category_id=request.POST['category'],
+            user=user
+        )
+        if request.FILES.get('poster_image'):
+            event.poster_image = request.FILES['poster_image']
+            event.save()
+        messages.success(request, 'Event submitted and awaiting admin approval.')
+        return redirect('user_dashboard')  # or home
+    categories = Category.objects.all()
+    return render(request, 'create_event.html', {'categories': categories})
+
+@login_required
+def organizer_manage_bookings(request):
+    if request.session.get('user_role') != 'organizer':
+        return redirect('home')
+    
+    user = User.objects.get(id=request.session['user_id'])
+
+    # Get all bookings for this organizer's events
+    bookings = EventBooking.objects.select_related('event', 'user').filter(event__user=user).order_by('-created_at')
+
+    return render(request, 'organizer_manage_bookings.html', {'bookings': bookings})
+
+@login_required
+def edit_event(request, event_id):
+    user = User.objects.get(id=request.session['user_id'])
+    event = get_object_or_404(Event, id=event_id, user=user)
+
+    if request.method == 'POST':
+        event.title = request.POST['title']
+        event.description = request.POST['description']
+        event.date = request.POST['date']
+        event.start_time = request.POST['start_time']
+        event.end_time = request.POST['end_time']
+        event.location = request.POST['location']
+        event.city = request.POST['city']
+        event.is_ticketed = 'is_ticketed' in request.POST
+        event.category_id = request.POST['category']
+        
+        if request.FILES.get('poster_image'):
+            event.poster_image = request.FILES['poster_image']
+        
+        event.is_approved = False  # Reset approval on edit
+        event.save()
+
+        messages.success(request, 'Event updated and pending approval again.')
+        return redirect('user_dashboard')
+
+    categories = Category.objects.all()
+    return render(request, 'edit_event.html', {'event': event, 'categories': categories})
