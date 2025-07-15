@@ -5,6 +5,13 @@
         <h1 class="text-center fw-bold mb-4">Welcome back</h1>
         <form method="post" class="bg-white p-4 rounded-4 shadow-sm">
             {% csrf_token %}
+
+            {% if errors.inactive %}
+            <div class="alert alert-danger">
+                {{ errors.inactive }}
+            </div>
+            {% endif %}
+
             <div class="mb-3">
                 <label for="email" class="form-label">Email</label>
                 <input type="email" class="form-control {% if errors.email %}is-invalid{% endif %}" id="email" name="email" placeholder="Enter your email"

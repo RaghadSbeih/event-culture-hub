@@ -92,16 +92,21 @@ def login_view(request):
         errors = User.objects.login_validator(request.POST)
         form_data = request.POST.dict()
         form_data.pop('password', None)
-        
+
         if not errors:
             user = User.objects.get(email=request.POST['email'])
-            request.session['user_id'] = user.id
-            request.session['user_role'] = (
-                'admin' if user.is_admin else 'organizer' if user.is_organizer else 'user'
-            )
-            request.session['username'] = user.username
 
-            return redirect('admin_dashboard' if user.is_admin else 'user_dashboard' if user.is_organizer else 'home')
+            # Check if user is active
+            if not user.is_active:
+                errors['inactive'] = "Your account is deactivated. Please contact admin."
+            else:
+                request.session['user_id'] = user.id
+                request.session['user_role'] = (
+                    'admin' if user.is_admin else 'organizer' if user.is_organizer else 'user'
+                )
+                request.session['username'] = user.username
+
+                return redirect('admin_dashboard' if user.is_admin else 'user_dashboard' if user.is_organizer else 'home')
 
     return render(request, 'login.html', {'errors': errors, 'form_data': form_data})
 
@@ -317,3 +322,43 @@ def edit_event(request, event_id):
 
     categories = Category.objects.all()
     return render(request, 'edit_event.html', {'event': event, 'categories': categories})
+
+@admin_required
+def admin_toggle_user_active(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    # Prevent toggling own active status (optional safety)
+    if user.id == request.session.get('user_id'):
+        messages.error(request, "You cannot deactivate yourself.")
+        return redirect('admin_manage_users')
+
+    user.is_active = not user.is_active
+    user.save()
+    status = "activated" if user.is_active else "deactivated"
+    messages.success(request, f"User '{user.username}' has been {status}.")
+    return redirect('admin_manage_users')
+
+@admin_required
+def admin_toggle_organizer(request, user_id):
+    if request.method == 'POST':
+        user = get_object_or_404(User, id=user_id)
+        if not user.is_admin:
+            user.is_organizer = not user.is_organizer
+            user.save()
+            if user.is_organizer:
+                messages.success(request, f'{user.username} promoted to Organizer.')
+            else:
+                messages.success(request, f'{user.username} demoted to User.')
+    return redirect('admin_manage_users')
+
+@admin_required
+def admin_delete_user(request, user_id):
+    if request.method == 'POST':
+        user = get_object_or_404(User, id=user_id)
+        # Prevent deleting admins
+        if user.is_admin:
+            messages.error(request, "You cannot delete an admin user.")
+        else:
+            username = user.username
+            user.delete()
+            messages.success(request, f"User {username} has been deleted.")
+    return redirect('admin_manage_users')

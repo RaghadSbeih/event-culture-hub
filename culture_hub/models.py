@@ -32,12 +32,16 @@ class UserManager(models.Manager):
         if not user:
             errors['email'] = "Invalid email/password"
         else:
-            try:
-                if not bcrypt.checkpw(postData.get('password', '').encode(), user.password.encode()):
+            if not user.is_active:
+                errors['inactive'] = "Account is deactivated. Contact admin."
+            else:
+                try:
+                    if not bcrypt.checkpw(postData.get('password', '').encode(), user.password.encode()):
+                        errors['password'] = "Invalid email/password"
+                except Exception:
                     errors['password'] = "Invalid email/password"
-            except Exception as e:
-                errors['password'] = "Invalid email/password"
         return errors
+
 
 class User(models.Model):
     username = models.CharField(max_length=50, unique=True)
@@ -45,6 +49,7 @@ class User(models.Model):
     password = models.CharField(max_length=128)
     is_organizer = models.BooleanField(default=False)
     is_admin = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
     date_joined = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
