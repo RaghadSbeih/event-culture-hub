@@ -34,6 +34,4 @@ urlpatterns = [
     path('event/<int:event_id>/edit/', views.edit_event, name='edit_event'),
 
     path('organizer/bookings/', views.organizer_manage_bookings, name='organizer_manage_bookings'),
-    
-    
 ]

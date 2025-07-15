@@ -362,3 +362,4 @@ def admin_delete_user(request, user_id):
             user.delete()
             messages.success(request, f"User {username} has been deleted.")
     return redirect('admin_manage_users')
+  
