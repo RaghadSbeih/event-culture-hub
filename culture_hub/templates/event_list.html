@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container my-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="fw-bold">Events</h2>
+        <a href="{% url 'create_event' %}" class="btn btn-success rounded-pill px-4">Create Event</a>
+    </div>
+    <form method="get" class="row g-3 mb-4 bg-light p-3 rounded-4 shadow-sm">
+        <div class="col-md-3">
+            <input type="text" name="title" class="form-control" placeholder="Search by title"
+                value="{{ selected.title }}">
+        </div>
+        <div class="col-md-3">
+            <select name="city" class="form-select">
+                <option value="">All Cities</option>
+                {% for city in all_cities %}
+                <option value="{{ city }}" {% if selected.city == city %}selected{% endif %}>{{ city }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-3">
+            <select name="category" class="form-select">
+                <option value="">All Categories</option>
+                {% for category in all_categories %}
+                <option value="{{ category }}" {% if selected.category == category %}selected{% endif %}>{{ category }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-2">
+            <input type="date" name="date" class="form-control" value="{{ selected.date }}">
+        </div>
+        <div class="col-md-1 d-grid">
+            <button type="submit" class="btn btn-outline-success">Filter</button>
+        </div>
+    </form>
+    <div class="row g-4">
+        {% if events %}
+        {% for event in events %}
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm">
+                {% if event.poster %}
+                <img src="{{ event.poster.url }}" class="card-img-top" alt="{{ event.title }} poster"
+                    style="height:160px; object-fit:cover;">
+                {% else %}
+                <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80"
+                    class="card-img-top" alt="Event poster" style="height:160px; object-fit:cover;">
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ event.title }}</h5>
+                    <p class="card-text mb-1"><strong>City:</strong> {{ event.city }}</p>
+                    <p class="card-text mb-1"><strong>Date:</strong> {{ event.date|date:"M d, Y" }}</p>
+                    <p class="card-text mb-1"><strong>Category:</strong> {{ event.category.name }}</p>
+                    <p class="card-text">{{ event.description|truncatewords:18 }}</p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <div class="col-12">
+            <div class="alert alert-info text-center">No events found matching your criteria.</div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
