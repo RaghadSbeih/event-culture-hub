@@ -362,4 +362,31 @@ def admin_delete_user(request, user_id):
             user.delete()
             messages.success(request, f"User {username} has been deleted.")
     return redirect('admin_manage_users')
+
+def event_list(request):
+    from django.db.models import Q
+    events = Event.objects.filter(is_approved=True)
+    # Filtering logic (by title, city, category, date)
+    title = request.GET.get('title', '')
+    city = request.GET.get('city', '')
+    category = request.GET.get('category', '')
+    date = request.GET.get('date', '')
+    if title:
+        events = events.filter(title__icontains=title)
+    if city:
+        events = events.filter(city__icontains=city)
+    if category:
+        events = events.filter(category__name__icontains=category)
+    if date:
+        events = events.filter(date=date)
+    # For filter dropdowns
+    all_cities = Event.objects.values_list('city', flat=True).distinct()
+    all_categories = Category.objects.values_list('name', flat=True).distinct()
+    context = {
+        'events': events.order_by('date'),
+        'all_cities': all_cities,
+        'all_categories': all_categories,
+        'selected': {'title': title, 'city': city, 'category': category, 'date': date},
+    }
+    return render(request, 'event_list.html', context)
   
