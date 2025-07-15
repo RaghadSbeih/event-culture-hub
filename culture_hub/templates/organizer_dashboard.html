@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Organizer Dashboard</h2>
+
+<p>Welcome, {{ request.session.username }}!</p>
+
+<h3>Your Events</h3>
+
+{% if events %}
+    <ul>
+    {% for event in events %}
+        <li>
+            <strong>{{ event.title }}</strong> - 
+            {{ event.date }} at {{ event.location }} -
+            {% if event.is_approved %}
+                <span style="color:green;">Approved</span>
+            {% else %}
+                <span style="color:orange;">Pending Approval</span>
+            {% endif %}
+            - <a href="">Edit</a>
+            - <a href="">Delete</a>
+            - <a href="">View Bookings</a>
+        </li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>You have no events yet. <a href="{% url 'create_event' %}">Create one now!</a></p>
+{% endif %}
+
+{% endblock %}
