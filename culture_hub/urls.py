@@ -18,6 +18,11 @@ urlpatterns = [
     path('admin/events/<int:event_id>/approve/', views.admin_approve_event, name='admin_approve_event'),
     path('admin/events/<int:event_id>/reject/', views.admin_reject_event, name='admin_reject_event'),
 
+    path('admin/users/<int:user_id>/toggle/', views.admin_toggle_user_active, name='admin_toggle_user_active'),
+    path('admin/users/<int:user_id>/toggle_organizer/', views.admin_toggle_organizer, name='admin_toggle_organizer'),
+    path('admin/users/<int:user_id>/delete/', views.admin_delete_user, name='admin_delete_user'),
+    
+
     path('admin/users/', views.admin_manage_users, name='admin_manage_users'),
     path('admin/bookings/<int:booking_id>/', views.booking_detail, name='booking_detail'),
 
@@ -29,6 +34,4 @@ urlpatterns = [
     path('event/<int:event_id>/edit/', views.edit_event, name='edit_event'),
 
     path('organizer/bookings/', views.organizer_manage_bookings, name='organizer_manage_bookings'),
-    
-
 ]
