@@ -495,3 +495,4 @@ def profile_settings(request):
         form = ProfileForm(instance=profile)
     
     return render(request, 'profile_settings.html', {'form': form})
+  
