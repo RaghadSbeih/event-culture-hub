@@ -21,48 +21,79 @@
 
                 <div class="mb-3">
                     <label class="form-label">Title</label>
-                    <input type="text" name="title" class="form-control" required>
+                    <input type="text" name="title" class="form-control" required
+                        value="{{ form_data.title|default:'' }}">
+                    {% if errors.title %}
+                    <div class="text-danger small">{{ errors.title }}</div>
+                    {% endif %}
                 </div>
 
                 <div class="mb-3">
                     <label class="form-label">Description</label>
-                    <textarea name="description" class="form-control" rows="4" required></textarea>
+                    <textarea name="description" class="form-control" rows="4"
+                        required>{{ form_data.description|default:'' }}</textarea>
+                    {% if errors.description %}
+                    <div class="text-danger small">{{ errors.description }}</div>
+                    {% endif %}
                 </div>
 
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Date</label>
-                        <input type="date" name="date" class="form-control" required>
+                        <input type="date" name="date" class="form-control" required
+                            value="{{ form_data.date|default:'' }}">
+                        {% if errors.date %}
+                        <div class="text-danger small">{{ errors.date }}</div>
+                        {% endif %}
                     </div>
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Category</label>
                         <select name="category" class="form-select">
                             {% for cat in categories %}
-                                <option value="{{ cat.id }}">{{ cat.name }}</option>
+                            <option value="{{ cat.id }}" {% if form_data.category == cat.id|stringformat:'s' %}selected 
+                            {% endif %}>{{ cat.name }}</option>
                             {% endfor %}
                         </select>
+                        {% if errors.category %}
+                        <div class="text-danger small">{{ errors.category }}</div>
+                        {% endif %}
                     </div>
                 </div>
 
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Start Time</label>
-                        <input type="time" name="start_time" class="form-control">
+                        <input type="time" name="start_time" class="form-control"
+                            value="{{ form_data.start_time|default:'' }}">
+                        {% if errors.start_time %}
+                        <div class="text-danger small">{{ errors.start_time }}</div>
+                        {% endif %}
                     </div>
                     <div class="col-md-6 mb-3">
                         <label class="form-label">End Time</label>
-                        <input type="time" name="end_time" class="form-control">
+                        <input type="time" name="end_time" class="form-control"
+                            value="{{ form_data.end_time|default:'' }}">
+                        {% if errors.end_time %}
+                        <div class="text-danger small">{{ errors.end_time }}</div>
+                        {% endif %}
                     </div>
                 </div>
 
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Location</label>
-                        <input type="text" name="location" class="form-control">
+                        <input type="text" name="location" class="form-control"
+                            value="{{ form_data.location|default:'' }}">
+                        {% if errors.location %}
+                        <div class="text-danger small">{{ errors.location }}</div>
+                        {% endif %}
                     </div>
                     <div class="col-md-6 mb-3">
                         <label class="form-label">City</label>
-                        <input type="text" name="city" class="form-control">
+                        <input type="text" name="city" class="form-control" value="{{ form_data.city|default:'' }}">
+                        {% if errors.city %}
+                        <div class="text-danger small">{{ errors.city }}</div>
+                        {% endif %}
                     </div>
                 </div>
 
