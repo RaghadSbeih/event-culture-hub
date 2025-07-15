@@ -5,6 +5,7 @@ from django.db.models import Sum
 from django.contrib import messages
 from django.utils import timezone
 from .models import User, Profile, Event, EventBooking, Payment, Blog, Category
+from .forms import ProfileForm
 
 # ──────────────── Decorators ──────────────── #
 
@@ -27,7 +28,16 @@ def admin_required(view_func):
 # ──────────────── Public Views ──────────────── #
 
 def home(request):
-    return render(request, 'home.html')
+    # Query featured and upcoming events (approved only)
+    featured_events = Event.objects.filter(
+        is_approved=True,
+        date__gte=timezone.now().date(),
+    ).order_by('date')[:6]  # limit to 3 for example
+    
+    context = {
+        'featured_events': featured_events,
+    }
+    return render(request, 'home.html', context)
 
 def about(request):
     return render(request, 'about.html')
@@ -469,3 +479,19 @@ def cancel_booking(request, booking_id):
         else:
             messages.error(request, 'Cannot cancel this booking.')
     return redirect('user_manage_bookings')
+
+@login_required
+def profile_settings(request):
+    user = get_object_or_404(User, id=request.session['user_id'])
+    profile, created = Profile.objects.get_or_create(user=user)
+    
+    if request.method == 'POST':
+        form = ProfileForm(request.POST, request.FILES, instance=profile)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Profile updated successfully.')
+            return redirect('profile_settings')
+    else:
+        form = ProfileForm(instance=profile)
+    
+    return render(request, 'profile_settings.html', {'form': form})
