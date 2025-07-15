@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container my-4">
+    {% if messages %}
+    <div class="container mb-4">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Event Image -->
+            <div class="mb-4">
+                {% if event.poster_image %}
+                <img src="{{ event.poster_image.url }}" class="img-fluid rounded-4 shadow-sm" alt="{{ event.title }}"
+                    style="width: 100%; height: 400px; object-fit: cover;">
+                {% else %}
+                <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80"
+                    class="img-fluid rounded-4 shadow-sm" alt="Event poster"
+                    style="width: 100%; height: 400px; object-fit: cover;">
+                {% endif %}
+            </div>
+
+            <!-- Event Details -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <h1 class="fw-bold mb-3">{{ event.title }}</h1>
+
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="bi bi-calendar-event text-success me-2"></i>
+                                <div>
+                                    <small class="text-muted">Date</small>
+                                    <div class="fw-semibold">{{ event.date|date:"l, F d, Y" }}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="bi bi-clock text-primary me-2"></i>
+                                <div>
+                                    <small class="text-muted">Time</small>
+                                    <div class="fw-semibold">{{ event.start_time|time:"g:i A" }} - 
+                                        {{ event.end_time|time:"g:i A" }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="bi bi-geo-alt text-danger me-2"></i>
+                                <div>
+                                    <small class="text-muted">Location</small>
+                                    <div class="fw-semibold">{{ event.location }}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="bi bi-building text-info me-2"></i>
+                                <div>
+                                    <small class="text-muted">City</small>
+                                    <div class="fw-semibold">{{ event.city }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="bi bi-tag text-warning me-2"></i>
+                            <div>
+                                <small class="text-muted">Category</small>
+                                <div class="fw-semibold">{{ event.category.name }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <h5 class="fw-bold mb-3">About This Event</h5>
+                        <p class="text-muted lh-lg">{{ event.description }}</p>
+                    </div>
+
+                    <div class="mb-4">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-person-circle text-secondary me-2"></i>
+                            <div>
+                                <small class="text-muted">Organized by</small>
+                                <div class="fw-semibold">{{ event.user.username }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm sticky-top" style="top: 2rem;">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-3">Event Summary</h5>
+
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-muted">Date:</span>
+                            <span class="fw-semibold">{{ event.date|date:"M d, Y" }}</span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-muted">Time:</span>
+                            <span class="fw-semibold">{{ event.start_time|time:"g:i A" }}</span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-muted">Location:</span>
+                            <span class="fw-semibold">{{ event.city }}</span>
+                        </div>
+                    </div>
+
+                    {% if event.is_ticketed %}
+                    <div class="alert alert-info mb-3">
+                        <i class="bi bi-ticket-perforated me-2"></i>
+                        <strong>Ticketed Event</strong>
+                    </div>
+                    {% endif %}
+
+                    <div class="d-grid gap-2">
+                        {% if user_is_logged_in %}
+                        <form method="post" action="{% url 'book_event' event.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="bi bi-calendar-check me-2"></i>
+                                Book This Event
+                            </button>
+                        </form>
+                        {% else %}
+                        <a href="{% url 'login' %}" class="btn btn-outline-primary btn-lg">
+                            <i class="bi bi-box-arrow-in-right me-2"></i>
+                            Login to Book
+                        </a>
+                        {% endif %}
+
+                        <a href="{% url 'event_list' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-2"></i>
+                            Back to Events
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
