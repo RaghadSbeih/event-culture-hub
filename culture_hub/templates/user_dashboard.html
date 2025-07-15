@@ -6,6 +6,16 @@
             <h1 class="text-center mb-4">Welcome, {{ user.username }}!</h1>
         </div>
     </div>
+    {% if messages %}
+    <div class="container mb-4">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
     {% if user.is_organizer %}
     <!-- Organizer Section -->
     <div class="row mt-2">
@@ -32,7 +42,7 @@
                                 </small>
                             </div>
                             <div>
-                                <a href="{% url 'organizer_manage_bookings' %}" class="btn btn-outline-primary btn-sm me-2">Manage Bookings</a>
+                                <a href="{% url 'organizer_manage_bookings' event.id %}" class="btn btn-outline-primary btn-sm me-2">Manage Bookings</a>
                                 <a href="{% url 'edit_event' event.id %}" class="btn btn-outline-secondary btn-sm">Edit</a>
                             </div>
                         </li>

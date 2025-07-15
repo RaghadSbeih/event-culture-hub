@@ -3,7 +3,7 @@ from functools import wraps
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import Sum
 from django.contrib import messages
-
+from django.utils import timezone
 from .models import User, Profile, Event, EventBooking, Payment, Blog, Category
 
 # ──────────────── Decorators ──────────────── #
@@ -296,6 +296,31 @@ def organizer_manage_bookings(request):
     return render(request, 'organizer_manage_bookings.html', {'bookings': bookings})
 
 @login_required
+def organizer_confirm_booking(request, booking_id):
+    booking = get_object_or_404(EventBooking, id=booking_id)
+    event_id = booking.event.id
+    
+    booking.status = 'confirmed'
+    booking.save()
+    
+    messages.success(request, "Booking confirmed successfully.")
+    return redirect('organizer_manage_bookings', event_id=event_id)
+
+@login_required
+def organizer_cancel_booking(request, booking_id):
+    booking = get_object_or_404(EventBooking, id=booking_id)
+    event_id = booking.event.id  # get event id from the booking
+    
+    # Cancel the booking
+    booking.status = 'cancelled'
+    booking.save()
+    
+    messages.success(request, "Booking cancelled successfully.")
+    
+    # Redirect back to the organizer's bookings page for that event
+    return redirect('organizer_manage_bookings', event_id=event_id)
+
+@login_required
 def edit_event(request, event_id):
     user = User.objects.get(id=request.session['user_id'])
     event = get_object_or_404(Event, id=event_id, user=user)
@@ -389,4 +414,58 @@ def event_list(request):
         'selected': {'title': title, 'city': city, 'category': category, 'date': date},
     }
     return render(request, 'event_list.html', context)
-  
+
+@login_required
+def book_event(request, event_id):
+    user = User.objects.get(id=request.session['user_id'])
+    event = get_object_or_404(Event, id=event_id, is_approved=True)
+
+    # Prevent duplicate bookings
+    if EventBooking.objects.filter(user=user, event=event).exists():
+        messages.warning(request, "You have already booked this event.")
+        return redirect('event_list')
+
+    EventBooking.objects.create(
+        user=user,
+        event=event,
+        booking_time=timezone.now(),
+        status='confirmed'  # ✅ Automatically confirmed
+    )
+    messages.success(request, "Booking confirmed! See you at the event.")
+    return redirect('user_dashboard')
+
+@login_required
+def user_manage_bookings(request):
+    user = User.objects.get(id=request.session['user_id'])
+    bookings = EventBooking.objects.filter(user=user).select_related('event').order_by('-created_at')
+    return render(request, 'user_manage_bookings.html', {'bookings': bookings})
+
+@login_required
+def organizer_manage_bookings(request, event_id):
+    user = User.objects.get(id=request.session['user_id'])
+    if not user.is_organizer:
+        return redirect('home')
+
+    # Check the event belongs to this organizer
+    event = get_object_or_404(Event, id=event_id, user=user)
+
+    # Get bookings only for this event
+    bookings = EventBooking.objects.filter(event=event).order_by('-created_at')
+
+    context = {
+        'event': event,
+        'bookings': bookings,
+    }
+    return render(request, 'organizer_manage_bookings.html', context)
+
+@login_required
+def cancel_booking(request, booking_id):
+    if request.method == 'POST':
+        booking = get_object_or_404(EventBooking, id=booking_id, user_id=request.session['user_id'])
+        if booking.status in ['pending', 'confirmed']:
+            booking.status = 'cancelled'
+            booking.save()
+            messages.success(request, 'Booking cancelled.')
+        else:
+            messages.error(request, 'Cannot cancel this booking.')
+    return redirect('user_manage_bookings')
