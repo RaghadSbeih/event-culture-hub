@@ -290,6 +290,22 @@ def create_event(request):
         "Conferences & Tech",
         "Other"
     ]
+    palestinian_cities = [
+        "Jerusalem (Al-Quds)",
+        "Ramallah",
+        "Gaza",
+        "Hebron (Al-Khalil)",
+        "Nablus",
+        "Bethlehem",
+        "Jericho",
+        "Jenin",
+        "Tulkarm",
+        "Qalqilya",
+        "Haifa",
+        "Jaffa (Yafa)",
+        "Acre (Akka)",
+        "Nazareth (Al-Nasirah)"
+    ]
     from datetime import date, datetime
     if request.method == 'POST':
         user = User.objects.get(id=request.session['user_id'])
@@ -356,7 +372,7 @@ def create_event(request):
     categories = Category.objects.all()
     if not categories.exists():
         categories = [{'id': i+1, 'name': name} for i, name in enumerate(default_categories)]
-    return render(request, 'create_event.html', {'categories': categories, 'errors': errors, 'form_data': form_data})
+    return render(request, 'create_event.html', {'categories': categories, 'cities': palestinian_cities, 'errors': errors, 'form_data': form_data})
 
 @login_required
 def organizer_manage_bookings(request):
@@ -560,3 +576,11 @@ def profile_settings(request):
         form = ProfileForm(instance=profile)
     
     return render(request, 'profile_settings.html', {'form': form})
+
+def event_detail(request, event_id):
+    event = get_object_or_404(Event, id=event_id, is_approved=True)
+    context = {
+        'event': event,
+        'user_is_logged_in': request.session.get('user_id') is not None,
+    }
+    return render(request, 'event_detail.html', context)
