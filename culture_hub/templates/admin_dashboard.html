@@ -113,9 +113,9 @@
                         </td>
                         <td>{{ booking.created_at|date:"M d, Y" }}</td>
                         <td>
-                            <a href="{% url 'admin:booking_detail' booking.id %}" class="btn btn-sm btn-outline-primary">View</a>
-                            <a href="{% url 'admin:booking_confirm' booking.id %}" class="btn btn-sm btn-success">Confirm</a>
-                            <a href="{% url 'admin:booking_cancel' booking.id %}" class="btn btn-sm btn-danger">Cancel</a>
+                            <a href="{% url 'booking_detail' booking.id %}" class="btn btn-sm btn-outline-primary">View</a>
+                            <a href="{% url 'booking_confirm' booking.id %}" class="btn btn-sm btn-success">Confirm</a>
+                            <a href="{% url 'booking_cancel' booking.id %}" class="btn btn-sm btn-danger">Cancel</a>
                         </td>
                     </tr>
                     {% empty %}

@@ -18,7 +18,7 @@
                 {% for event in pending_events %}
                 <tr>
                     <td>{{ event.title }}</td>
-                    <td>{{ event.organizer.username }}</td>
+                    <td>{{ event.user.username }}</td>
                     <td>{{ event.date|date:"M d, Y" }}</td>
                     <td>
                         <!-- Approve Form -->
