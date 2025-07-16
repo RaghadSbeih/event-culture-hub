@@ -576,3 +576,11 @@ def profile_settings(request):
         form = ProfileForm(instance=profile)
     
     return render(request, 'profile_settings.html', {'form': form})
+
+def event_detail(request, event_id):
+    event = get_object_or_404(Event, id=event_id, is_approved=True)
+    context = {
+        'event': event,
+        'user_is_logged_in': request.session.get('user_id') is not None,
+    }
+    return render(request, 'event_detail.html', context)
