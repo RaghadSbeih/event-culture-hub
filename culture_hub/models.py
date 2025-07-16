@@ -1,4 +1,4 @@
-import re
+import re , uuid
 import bcrypt
 from django.db import models
 
@@ -123,6 +123,7 @@ class Comment(models.Model):
 class NewsletterSubscriber(models.Model):
     email = models.EmailField(max_length=100, unique=True)
     subscribed_at = models.DateTimeField(auto_now_add=True)
+    unsubscribe_token = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
