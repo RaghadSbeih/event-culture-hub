@@ -4,6 +4,9 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import Sum, Q
 from django.contrib import messages
 from django.utils import timezone
+from .models import User, Profile, Event, EventBooking, Payment, Blog, Category, Comment
+from .forms import ProfileForm
+from django.contrib.auth.decorators import login_required as django_login_required
 
 # ──────────────── Decorators ──────────────── #
 
@@ -514,16 +517,32 @@ def event_list(request):
 def book_event(request, event_id):
     user = User.objects.get(id=request.session['user_id'])
     event = get_object_or_404(Event, id=event_id, is_approved=True)
+
+    # Prevent duplicate bookings
     if EventBooking.objects.filter(user=user, event=event).exists():
         messages.warning(request, "You have already booked this event.")
         return redirect('event_list')
-    booking = EventBooking.objects.create(
-        user=user,
-        event=event,
-        booking_time=timezone.now(),
-        status='confirmed'
-    )
-    return redirect('booking_payment', booking_id=booking.id)
+
+    if event.is_ticketed:
+        # Ticketed event → booking is pending, redirect to payment
+        booking = EventBooking.objects.create(
+            user=user,
+            event=event,
+            booking_time=timezone.now(),
+            status='pending'  # waiting for payment
+        )
+        messages.info(request, "Please complete your payment to confirm the booking.")
+        return redirect('booking_payment', booking_id=booking.id)
+    else:
+        # Non-ticketed event → auto confirmed booking
+        booking = EventBooking.objects.create(
+            user=user,
+            event=event,
+            booking_time=timezone.now(),
+            status='confirmed'  # auto confirmed
+        )
+        messages.success(request, "Booking confirmed! See you at the event.")
+        return redirect('user_dashboard')
 
 def booking_payment(request, booking_id):
     booking = get_object_or_404(EventBooking, id=booking_id, user_id=request.session['user_id'])
@@ -623,7 +642,19 @@ def profile_settings(request):
     return render(request, 'profile_settings.html', {'form': form})
 
 def event_detail(request, event_id):
-
+    event = get_object_or_404(Event, id=event_id, is_approved=True)
+    comments = Comment.objects.filter(event=event).select_related('user').order_by('-created_at')
+    user_id = request.session.get('user_id')
+    user_has_commented = False
+    if user_id:
+        user_has_commented = Comment.objects.filter(event=event, user_id=user_id).exists()
+    context = {
+        'event': event,
+        'user_is_logged_in': user_id is not None,
+        'comments': comments,
+        'user_has_commented': user_has_commented,
+    }
+    return render(request, 'event_detail.html', context)
 
 @login_required
 def add_comment(request, event_id):
