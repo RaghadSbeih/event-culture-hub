@@ -43,11 +43,11 @@
 
         footer {
             background: #f8faf5;
-            border-top: 3px solid #5a6c2f;
-            padding: 28px 0 22px;
+            border-top: 2px solid #5a6c2f;
+            padding: 16px 0 14px; 
             color: #5a6c2f;
-            box-shadow: 0 -4px 18px rgba(90, 108, 47, 0.08);
-            position: relative;
+            box-shadow: 0 -3px 14px rgba(90, 108, 47, 0.07);
+            font-size: 0.85rem; 
         }
 
         footer::before {
@@ -167,9 +167,10 @@
             transition: all 0.3s ease;
             text-decoration: none;
             font-weight: 500;
-            padding: 8px 12px;
             border-radius: 8px;
             position: relative;
+            font-size: 0.85rem;
+            padding: 4px 8px;
         }
 
         footer a:hover {
@@ -290,6 +291,14 @@
             transition: all 0.2s;
         }
 
+        .btn-custom-sm {
+            padding: 6px 16px;
+            font-size: 0.85rem;
+            border-radius: 8px;
+            height: 31px;
+            line-height: 1;
+        }
+
         .btn-primary,
         .btn-success {
             background: linear-gradient(90deg, #7fae3e 60%, #5a6c2f 100%);
@@ -366,19 +375,38 @@
 
     <footer class="py-4">
         <div class="container">
-            <div class="d-flex flex-column flex-md-row justify-content-between align-items-center">
-                <div class="mb-2 mb-md-0 text-center text-md-start">
-                    <strong>Email:</strong> contact@culturehub.com
+            <!-- Compact Newsletter Subscription -->
+            <div class="row justify-content-center align-items-center mb-3">
+                <div class="col-12 col-md-10 col-lg-8">
+                    <form action="{% url 'subscribe' %}" method="POST" class="row g-1">
+                        {% csrf_token %}
+                        <div class="col-12 col-sm-8 col-md-9">
+                            <input type="email" name="email" class="form-control form-control-sm" placeholder="Enter your email" required>
+                        </div>
+                        <div class="col-12 col-sm-4 col-md-3">
+                            <button type="submit" class="btn btn-outline-custom btn-custom-sm w-100">Subscribe</button>
+                        </div>
+                    </form>
+                    {% if messages %}
+                        <div class="mt-2">
+                            {% for message in messages %}
+                                <div class="alert alert-info py-1 px-2 mb-1 small">{{ message }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
                 </div>
-                <div class="mb-2 mb-md-0 text-center">
-                    <strong>Phone:</strong> +970-599-222-666
-                </div>
-                <div class="text-center text-md-end">
-                    <a href="/terms_Privacy" class="me-3">Terms & Privacy</a>
-                </div>
+            </div>
+
+            <!-- Footer Info -->
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-center small text-center text-md-start">
+                <div class="mb-2 mb-md-0"><strong>Email:</strong> contact@culturehub.com</div>
+                <div class="mb-2 mb-md-0"><strong>Phone:</strong> +970-599-222-666</div>
+                <div><a href="/terms_Privacy" class="me-2">Terms & Privacy</a></div>
             </div>
         </div>
     </footer>
+
+
     <!-- Bootstrap 5 JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
