@@ -13,6 +13,8 @@ urlpatterns = [
     path('admin/dashboard/', views.admin_dashboard, name='admin_dashboard'),
     path('organizer/dashboard/', views.organizer_dashboard, name='organizer_dashboard'),
     path('profile/settings/', views.profile_settings, name='profile_settings'),
+    path("subscribe/", views.subscribe, name="subscribe"),
+
 
     # Admin management URLs
     path('admin/events/pending/', views.admin_pending_events, name='admin_pending_events'),
@@ -52,5 +54,9 @@ urlpatterns = [
     path('blogs/<int:blog_id>/', views.blog_detail, name='blog_detail'),
     path('blogs/<int:blog_id>/delete/', views.delete_blog, name='delete_blog'),
     path('comment/<int:comment_id>/delete/', views.delete_comment, name='delete_comment'),
+
+    path("admin/send-newsletter/", views.send_newsletter, name="send_newsletter"),
+    path("unsubscribe/<uuid:token>/", views.unsubscribe, name="unsubscribe"),
+
 
 ]

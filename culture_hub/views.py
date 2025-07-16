@@ -1,12 +1,16 @@
 import bcrypt
 from functools import wraps
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect, get_object_or_404, HttpResponse
 from django.db.models import Sum, Q
 from django.contrib import messages
 from django.utils import timezone
-from .models import User, Profile, Event, EventBooking, Payment, Blog, Category, Comment
+from .models import User, Profile, Event, EventBooking, Payment, Blog, Category, Comment, NewsletterSubscriber
 from .forms import ProfileForm
 from django.contrib.auth.decorators import login_required as django_login_required
+from django.core.mail import send_mail
+from django.contrib.admin.views.decorators import staff_member_required
+from .forms import NewsletterForm
+from django.urls import reverse
 
 # ──────────────── Decorators ──────────────── #
 
@@ -735,3 +739,46 @@ def delete_comment(request, comment_id):
     else:
         messages.error(request, 'Invalid request method.')
     return redirect('event_detail', event_id=event_id)
+
+def subscribe(request):
+    if request.method == "POST":
+        email = request.POST.get("email")
+        if email and not NewsletterSubscriber.objects.filter(email=email).exists():
+            NewsletterSubscriber.objects.create(email=email)
+            messages.success(request, "You've been subscribed!")
+        else:
+            messages.warning(request, "You're already subscribed.")
+    return redirect(request.META.get("HTTP_REFERER", "/"))
+
+@staff_member_required
+def send_newsletter(request):
+    if request.method == "POST":
+        form = NewsletterForm(request.POST)
+        if form.is_valid():
+            subject = form.cleaned_data["subject"]
+            message = form.cleaned_data["message"]
+            message += "\n\nAlternatively, reply to this email with 'UNSUBSCRIBE'."
+
+            for subscriber in NewsletterSubscriber.objects.all():
+                unsubscribe_url = request.build_absolute_uri(
+                    reverse('unsubscribe', args=[subscriber.unsubscribe_token])
+                )
+                personalized_message = (
+                    f"{message}\n\nTo unsubscribe, click here: {unsubscribe_url}"
+                )
+                send_mail(subject, personalized_message, "from@example.com", [subscriber.email])
+
+            messages.success(request, "Newsletter sent to all subscribers with unsubscribe links.")
+            return redirect("send_newsletter")
+    else:
+        form = NewsletterForm()
+    return render(request, "send_newsletter.html", {"form": form})
+
+
+def unsubscribe(request, token):
+    try:
+        subscriber = NewsletterSubscriber.objects.get(unsubscribe_token=token)
+        subscriber.delete()
+        return HttpResponse("You have been unsubscribed.")
+    except NewsletterSubscriber.DoesNotExist:
+        return HttpResponse("Invalid or expired unsubscribe link.")

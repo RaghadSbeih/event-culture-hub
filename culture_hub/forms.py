@@ -48,3 +48,7 @@ class ProfileForm(forms.ModelForm):
             'city': forms.TextInput(attrs={'class': 'form-control'}),
             'phone_number': forms.TextInput(attrs={'class': 'form-control'}),
         }
+
+class NewsletterForm(forms.Form):
+    subject = forms.CharField(max_length=255)
+    message = forms.CharField(widget=forms.Textarea)
