@@ -1,40 +1,62 @@
 {% extends "base.html" %}
 {% block content %}
-<h2 class="dashboard-header">Organizer Dashboard</h2>
-    {% if messages %}
-        <div class="container mb-4">
-            {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+<div class="dashboard-card container py-4">
+    <div class="dashboard-header mb-4">Organizer Dashboard</div>
+    <div class="row mb-4 mt-4">
+        <div class="col-md-4 mb-3">
+            <div class="dashboard-card card h-100 border-0 shadow-sm">
+                <div class="card-body text-center dashboard-stat">
+                    <h3 class="card-title text-success mb-2">{{ total_events }}</h3>
+                    <p class="card-text text-muted">Your Events</p>
+                </div>
             </div>
-            {% endfor %}
         </div>
-    {% endif %}
-
-<p>Welcome, {{ request.session.username }}!</p>
-
-<h3>Your Events</h3>
-
-{% if events %}
-    <ul>
-    {% for event in events %}
-        <li>
-            <strong>{{ event.title }}</strong> - 
-            {{ event.date }} at {{ event.location }} -
-            {% if event.is_approved %}
-                <span style="color:green;">Approved</span>
-            {% else %}
-                <span style="color:orange;">Pending Approval</span>
-            {% endif %}
-            - <a href="">Edit</a>
-            - <a href="">Delete</a>
-            - <a href="">View Bookings</a>
-        </li>
-    {% endfor %}
-    </ul>
-{% else %}
-    <p>You have no events yet. <a href="{% url 'create_event' %}">Create one now!</a></p>
-{% endif %}
-
+        <div class="col-md-4 mb-3">
+            <div class="dashboard-card card h-100 border-0 shadow-sm">
+                <div class="card-body text-center dashboard-stat">
+                    <h3 class="card-title text-success mb-2">{{ total_bookings }}</h3>
+                    <p class="card-text text-muted">Total Bookings</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="dashboard-card card h-100 border-0 shadow-sm">
+                <div class="card-body text-center dashboard-stat">
+                    <h3 class="card-title text-success mb-2">{{ total_payments }}</h3>
+                    <p class="card-text text-muted">Payments Received</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="d-flex justify-content-end mb-3">
+        <a href="{% url 'create_event' %}" class="btn btn-sm btn-outline-custom">Create New Event</a>
+    </div>
+    <div class="dashboard-header mb-3">Your Events</div>
+    <div class="table-responsive">
+        <table class="table table-striped mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Title</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for event in events %}
+                <tr>
+                    <td>{{ event.title }}</td>
+                    <td>{{ event.date|date:"M d, Y" }}</td>
+                    <td>{{ event.status }}</td>
+                    <td>
+                        <a href="{% url 'edit_event' event.id %}" class="btn btn-outline-custom btn-sm">Edit</a>
+                        <a href="{% url 'delete_event' event.id %}" class="btn btn-outline-custom btn-sm">Delete</a>
+                        <a href="{% url 'organizer_manage_bookings' %}" class="btn btn-outline-custom btn-sm">View Bookings</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
 {% endblock %}
