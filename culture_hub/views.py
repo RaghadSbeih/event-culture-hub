@@ -280,84 +280,77 @@ def dashboard_route(request):
     
 @login_required
 def create_event(request):
+    from datetime import date, datetime
     errors = {}
     form_data = {}
+
+    # Default categories & cities
     default_categories = [
-        "Music & Concerts",
-        "Art Exhibitions",
-        "Theatre & Plays",
-        "Film Screenings",
-        "Historical Tours",
-        "Heritage Workshops",
-        "Food & Culinary",
-        "Festivals",
-        "Literature & Books",
-        "Lectures & Talks",
-        "Markets & Bazaars",
-        "Kids & Family",
-        "Charity & Volunteer",
-        "Conferences & Tech",
-        "Other"
+        "Music & Concerts", "Art Exhibitions", "Theatre & Plays", "Film Screenings",
+        "Historical Tours", "Heritage Workshops", "Food & Culinary", "Festivals",
+        "Literature & Books", "Lectures & Talks", "Markets & Bazaars", "Kids & Family",
+        "Charity & Volunteer", "Conferences & Tech", "Other"
     ]
     palestinian_cities = [
-        "Jerusalem (Al-Quds)",
-        "Ramallah",
-        "Gaza",
-        "Hebron (Al-Khalil)",
-        "Nablus",
-        "Bethlehem",
-        "Jericho",
-        "Jenin",
-        "Tulkarm",
-        "Qalqilya",
-        "Haifa",
-        "Jaffa (Yafa)",
-        "Acre (Akka)",
-        "Nazareth (Al-Nasirah)"
+        "Jerusalem (Al-Quds)", "Ramallah", "Gaza", "Hebron (Al-Khalil)", "Nablus",
+        "Bethlehem", "Jericho", "Jenin", "Tulkarm", "Qalqilya", "Haifa",
+        "Jaffa (Yafa)", "Acre (Akka)", "Nazareth (Al-Nasirah)"
     ]
-    from datetime import date, datetime
+
+    # Auto-create default categories if none exist
+    if not Category.objects.exists():
+        for name in default_categories:
+            Category.objects.get_or_create(name=name)
+
+    categories = Category.objects.all()
+
     if request.method == 'POST':
-        user = User.objects.get(id=request.session['user_id'])
+        user = get_object_or_404(User, id=request.session['user_id'])
         form_data = request.POST.dict()
-        # Required fields
+
+        # Required field validation
         required_fields = ['title', 'description', 'date', 'start_time', 'end_time', 'location', 'city', 'category']
         for field in required_fields:
             if not request.POST.get(field):
                 errors[field] = f'{field.replace("_", " ").capitalize()} is required.'
-        # Title length
-        if 'title' not in errors and len(request.POST.get('title', '')) < 5:
+
+        # Field-specific validations
+        if 'title' not in errors and len(request.POST['title']) < 5:
             errors['title'] = 'Title must be at least 5 characters.'
-        # Description length
-        if 'description' not in errors and len(request.POST.get('description', '')) < 10:
+
+        if 'description' not in errors and len(request.POST['description']) < 10:
             errors['description'] = 'Description must be at least 10 characters.'
-        # Date not in past
+
         if 'date' not in errors:
             try:
                 event_date = datetime.strptime(request.POST['date'], '%Y-%m-%d').date()
                 if event_date < date.today():
                     errors['date'] = 'Date cannot be in the past.'
-            except Exception:
+            except ValueError:
                 errors['date'] = 'Invalid date format.'
-        # Time not in past (if today)
+
         if 'start_time' not in errors and 'end_time' not in errors and 'date' not in errors:
             try:
-                event_date = datetime.strptime(request.POST['date'], '%Y-%m-%d').date()
-                now = datetime.now()
                 start_time = datetime.strptime(request.POST['start_time'], '%H:%M').time()
                 end_time = datetime.strptime(request.POST['end_time'], '%H:%M').time()
                 if event_date == date.today():
-                    if start_time <= now.time():
+                    now = datetime.now().time()
+                    if start_time <= now:
                         errors['start_time'] = 'Start time must be in the future.'
-                    if end_time <= now.time():
+                    if end_time <= now:
                         errors['end_time'] = 'End time must be in the future.'
-                if 'start_time' not in errors and 'end_time' not in errors:
-                    if end_time <= start_time:
-                        errors['end_time'] = 'End time must be after start time.'
-            except Exception:
+                if end_time <= start_time:
+                    errors['end_time'] = 'End time must be after start time.'
+            except ValueError:
                 errors['start_time'] = 'Invalid time format.'
+
+        # Validate category ID and fetch actual object
         category_id = request.POST.get('category')
-        if not category_id:
-            errors['category'] = 'Category is required.'
+        try:
+            category = Category.objects.get(id=category_id)
+        except (Category.DoesNotExist, ValueError, TypeError):
+            errors['category'] = 'Invalid category selected.'
+
         if not errors:
             event = Event.objects.create(
                 title=request.POST['title'],
@@ -368,20 +361,25 @@ def create_event(request):
                 location=request.POST['location'],
                 city=request.POST['city'],
                 is_ticketed='is_ticketed' in request.POST,
-                category_id=category_id,
+                category=category,
                 user=user
             )
+
             if request.FILES.get('poster_image'):
                 event.poster_image = request.FILES['poster_image']
                 event.save()
+
             messages.success(request, 'Event submitted and awaiting admin approval.')
             return redirect('user_dashboard')
         else:
             messages.error(request, 'Please correct the errors below.')
-    categories = Category.objects.all()
-    if not categories.exists():
-        categories = [{'id': i+1, 'name': name} for i, name in enumerate(default_categories)]
-    return render(request, 'create_event.html', {'categories': categories, 'cities': palestinian_cities, 'errors': errors, 'form_data': form_data})
+
+    return render(request, 'create_event.html', {
+        'categories': categories,
+        'cities': palestinian_cities,
+        'errors': errors,
+        'form_data': form_data
+    })
 
 @login_required
 def organizer_manage_bookings(request):
