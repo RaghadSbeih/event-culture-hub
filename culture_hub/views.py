@@ -4,11 +4,6 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import Sum, Q
 from django.contrib import messages
 from django.utils import timezone
-from .models import User, Profile, Event, EventBooking, Payment, Blog, Category
-import random
-import string
-from .forms import ProfileForm
-from django.contrib.auth.decorators import login_required as django_login_required
 
 # ──────────────── Decorators ──────────────── #
 
@@ -628,9 +623,41 @@ def profile_settings(request):
     return render(request, 'profile_settings.html', {'form': form})
 
 def event_detail(request, event_id):
-    event = get_object_or_404(Event, id=event_id)
-    user_is_logged_in = bool(request.session.get('user_id'))
-    return render(request, 'event_detail.html', {'event': event, 'user_is_logged_in': user_is_logged_in})
+
+
+@login_required
+def add_comment(request, event_id):
+    event = get_object_or_404(Event, id=event_id, is_approved=True)
+    user = User.objects.get(id=request.session['user_id'])
+    # Prevent multiple comments per user per event
+    if Comment.objects.filter(event=event, user=user).exists():
+        messages.error(request, 'You have already commented on this event.')
+        return redirect('event_detail', event_id=event.id)
+    if request.method == 'POST':
+        rating = request.POST.get('rating')
+        comment_text = request.POST.get('comment', '').strip()
+        errors = {}
+        try:
+            rating = int(rating)
+            if rating < 1 or rating > 5:
+                errors['rating'] = 'Rating must be between 1 and 5.'
+        except (TypeError, ValueError):
+            errors['rating'] = 'Rating is required.'
+        if not comment_text:
+            errors['comment'] = 'Comment cannot be empty.'
+        if errors:
+            comments = Comment.objects.filter(event=event).select_related('user').order_by('-created_at')
+            context = {
+                'event': event,
+                'user_is_logged_in': True,
+                'comments': comments,
+                'errors': errors,
+                'form_data': {'rating': rating, 'comment': comment_text},
+            }
+            return render(request, 'event_detail.html', context)
+        Comment.objects.create(event=event, user=user, rating=rating, comment=comment_text)
+        messages.success(request, 'Comment added!')
+    return redirect('event_detail', event_id=event.id)
 
 def blog_list(request):
     blogs = Blog.objects.filter(is_approved=True).order_by('-created_at')
@@ -717,3 +744,20 @@ def delete_blog(request, blog_id):
     else:
         messages.error(request, 'You do not have permission to delete this blog post.')
         return redirect('blog_list')
+
+@login_required
+def delete_comment(request, comment_id):
+    user_id = request.session.get('user_id')
+    user_role = request.session.get('user_role')
+    comment = get_object_or_404(Comment, id=comment_id)
+    event_id = comment.event.id
+    # Allow admin or comment owner
+    if user_role != 'admin' and comment.user_id != user_id:
+        messages.error(request, 'You do not have permission to delete this comment.')
+        return redirect('event_detail', event_id=event_id)
+    if request.method == 'POST':
+        comment.delete()
+        messages.success(request, 'Comment deleted.')
+    else:
+        messages.error(request, 'Invalid request method.')
+    return redirect('event_detail', event_id=event_id)

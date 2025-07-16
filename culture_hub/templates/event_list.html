@@ -34,7 +34,8 @@
             <select name="category" class="form-select">
                 <option value="">All Categories</option>
                 {% for category in all_categories %}
-                <option value="{{ category }}" {% if selected.category == category %}selected{% endif %}>{{ category }}</option>
+                <option value="{{ category }}" {% if selected.category == category %}selected{% endif %}>{{ category }}
+                </option>
                 {% endfor %}
             </select>
         </div>
@@ -76,15 +77,6 @@
                         {% endif %}
                         <a href="{% url 'event_detail' event.id %}" class="btn btn-outline-secondary btn-sm">View
                             Details</a>
-                        {% if request.session.user_id %}
-                        {% if request.session.user_role == 'admin' or event.user_id == request.session.user_id %}
-                        <form method="post" action="{% url 'delete_event' event.id %}" class="d-inline ms-1"
-                            onsubmit="return confirm('Are you sure you want to delete this event?');">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
-                        </form>
-                        {% endif %}
-                        {% endif %}
                     </div>
                 </div>
             </div>
