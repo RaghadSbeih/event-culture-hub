@@ -152,5 +152,70 @@
             </div>
         </div>
     </div>
+
+    <!-- Comments Section -->
+    <div class="row mt-5">
+        <div class="col-lg-8">
+            <h3 class="fw-bold mb-4">Comments</h3>
+            {% if user_is_logged_in and not user_has_commented %}
+            <div class="card mb-4">
+                <div class="card-body">
+                    <form method="post" action="{% url 'add_comment' event.id %}">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="rating" class="form-label">Rating</label>
+                            <select name="rating" id="rating" class="form-select" required>
+                                <option value="">Select rating</option>
+                                {% for i in "12345" %}
+                                <option value="{{ i }}" {% if form_data.rating|stringformat:'s' == i %}selected{% endif %}>{{ i }}</option>
+                                {% endfor %}
+                            </select>
+                            {% if errors.rating %}<div class="text-danger small">{{ errors.rating }}</div>{% endif %}
+                        </div>
+                        <div class="mb-3">
+                            <label for="comment" class="form-label">Comment</label>
+                            <textarea name="comment" id="comment" class="form-control" rows="3"
+                                required>{{ form_data.comment|default:'' }}</textarea>
+                            {% if errors.comment %}<div class="text-danger small">{{ errors.comment }}</div>{% endif %}
+                        </div>
+                        <button type="submit" class="btn btn-primary">Add Comment</button>
+                    </form>
+                </div>
+            </div>
+            {% elif user_is_logged_in and user_has_commented %}
+            <div class="alert alert-info">You have already commented on this event.</div>
+            {% else %}
+            <div class="alert alert-info">Please <a href="{% url 'login' %}">login</a> to add a comment.</div>
+            {% endif %}
+
+            {% if comments %}
+            <ul class="list-group">
+                {% for comment in comments %}
+                <li class="list-group-item py-3">
+                    <div class="d-flex justify-content-between align-items-center mb-1 flex-wrap">
+                        <div class="d-flex align-items-center gap-2 flex-wrap">
+                            <span class="fw-semibold fs-5">{{ comment.user.username }}</span>
+                            <span class="badge bg-warning text-dark ms-1">Rating: {{ comment.rating }}/5</span>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="text-muted small">{{ comment.created_at|date:"M d, Y H:i" }}</span>
+                            {% if request.session.user_role == 'admin' or comment.user_id == request.session.user_id %}
+                            <form method="post" action="{% url 'delete_comment' comment.id %}" class="d-inline"
+                                onsubmit="return confirm('Delete this comment?');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-danger ms-2">Delete</button>
+                            </form>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="ps-1 mt-1 text-break" style="font-size: 1.08rem;">{{ comment.comment }}</div>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <div class="alert alert-secondary mt-3">No comments yet. Be the first to comment!</div>
+            {% endif %}
+        </div>
+    </div>
 </div>
 {% endblock %}

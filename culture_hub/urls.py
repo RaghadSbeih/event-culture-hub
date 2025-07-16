@@ -38,6 +38,7 @@ urlpatterns = [
     path('event/<int:event_id>/', views.event_detail, name='event_detail'),
     path('event/<int:event_id>/book/', views.book_event, name='book_event'),
     path('event/<int:event_id>/delete/', views.delete_event, name='delete_event'),
+    path('event/<int:event_id>/add_comment/', views.add_comment, name='add_comment'),
 
     path('organizer/bookings/<int:event_id>/', views.organizer_manage_bookings, name='organizer_manage_bookings'),
     path('organizer/bookings/<int:booking_id>/confirm/', views.organizer_confirm_booking, name='organizer_confirm_booking'),
@@ -50,5 +51,6 @@ urlpatterns = [
     path('blogs/submit/success/', views.blog_submit_success, name='blog_submit_success'),
     path('blogs/<int:blog_id>/', views.blog_detail, name='blog_detail'),
     path('blogs/<int:blog_id>/delete/', views.delete_blog, name='delete_blog'),
+    path('comment/<int:comment_id>/delete/', views.delete_comment, name='delete_comment'),
 
 ]
