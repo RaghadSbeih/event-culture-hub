@@ -37,6 +37,7 @@ urlpatterns = [
     path('events/', views.event_list, name='event_list'),
     path('event/<int:event_id>/', views.event_detail, name='event_detail'),
     path('event/<int:event_id>/book/', views.book_event, name='book_event'),
+    path('event/<int:event_id>/delete/', views.delete_event, name='delete_event'),
 
     path('organizer/bookings/<int:event_id>/', views.organizer_manage_bookings, name='organizer_manage_bookings'),
     path('organizer/bookings/<int:booking_id>/confirm/', views.organizer_confirm_booking, name='organizer_confirm_booking'),
@@ -44,5 +45,10 @@ urlpatterns = [
 
     path('manage-bookings/', views.user_manage_bookings, name='user_manage_bookings'),
     path('manage-bookings/<int:booking_id>/cancel/', views.cancel_booking, name='cancel_booking'),
+    path('blogs/', views.blog_list, name='blog_list'),
+    path('blogs/submit/', views.blog_submit, name='blog_submit'),
+    path('blogs/submit/success/', views.blog_submit_success, name='blog_submit_success'),
+    path('blogs/<int:blog_id>/', views.blog_detail, name='blog_detail'),
+    path('blogs/<int:blog_id>/delete/', views.delete_blog, name='delete_blog'),
 
 ]

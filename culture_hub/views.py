@@ -6,6 +6,7 @@ from django.contrib import messages
 from django.utils import timezone
 from .models import User, Profile, Event, EventBooking, Payment, Blog, Category
 from .forms import ProfileForm
+from django.contrib.auth.decorators import login_required as django_login_required
 
 # ──────────────── Decorators ──────────────── #
 
@@ -590,3 +591,89 @@ def event_detail(request, event_id):
         'user_is_logged_in': request.session.get('user_id') is not None,
     }
     return render(request, 'event_detail.html', context)
+
+def blog_list(request):
+    blogs = Blog.objects.filter(is_approved=True).order_by('-created_at')
+    return render(request, 'blog_list.html', {'blogs': blogs})
+
+def blog_detail(request, blog_id):
+    blog = get_object_or_404(Blog, id=blog_id, is_approved=True)
+    return render(request, 'blog_detail.html', {'blog': blog})
+
+@login_required
+def blog_submit(request):
+    user_id = request.session.get('user_id')
+    if not user_id:
+        return redirect('login')
+    errors = {}
+    form_data = {}
+    if request.method == 'POST':
+        form_data = request.POST.dict()
+        title = request.POST.get('title', '').strip()
+        content = request.POST.get('content', '').strip()
+        image = request.FILES.get('image')
+        if not title:
+            errors['title'] = 'Title is required.'
+        if not content:
+            errors['content'] = 'Content is required.'
+        if len(title) < 5:
+            errors['title'] = 'Title must be at least 5 characters.'
+        if len(content) < 20:
+            errors['content'] = 'Content must be at least 20 characters.'
+        if not errors:
+            user = User.objects.get(id=user_id)
+            blog = Blog.objects.create(
+                title=title,
+                content=content,
+                user=user,
+                is_approved=False
+            )
+            if image:
+                blog.image = image
+                blog.save()
+            return redirect('blog_submit_success')
+    return render(request, 'blog_submit.html', {'errors': errors, 'form_data': form_data})
+
+def blog_submit_success(request):
+    return render(request, 'blog_submit_success.html')
+
+def delete_event(request, event_id):
+    """Allow event owner or admin to delete an event."""
+    event = get_object_or_404(Event, id=event_id)
+    user_id = request.session.get('user_id')
+    user_role = request.session.get('user_role')
+    if not user_id:
+        messages.error(request, 'You must be logged in to delete events.')
+        return redirect('login')
+    if user_role == 'admin' or event.user_id == user_id:
+        if request.method == 'POST':
+            event.delete()
+            messages.success(request, 'Event deleted successfully.')
+            return redirect('event_list')
+        else:
+            messages.error(request, 'Invalid request method.')
+            return redirect('event_list')
+    else:
+        messages.error(request, 'You do not have permission to delete this event.')
+        return redirect('event_list')
+
+
+def delete_blog(request, blog_id):
+    """Allow blog owner or admin to delete a blog post."""
+    blog = get_object_or_404(Blog, id=blog_id)
+    user_id = request.session.get('user_id')
+    user_role = request.session.get('user_role')
+    if not user_id:
+        messages.error(request, 'You must be logged in to delete blogs.')
+        return redirect('login')
+    if user_role == 'admin' or blog.user_id == user_id:
+        if request.method == 'POST':
+            blog.delete()
+            messages.success(request, 'Blog post deleted successfully.')
+            return redirect('blog_list')
+        else:
+            messages.error(request, 'Invalid request method.')
+            return redirect('blog_list')
+    else:
+        messages.error(request, 'You do not have permission to delete this blog post.')
+        return redirect('blog_list')
