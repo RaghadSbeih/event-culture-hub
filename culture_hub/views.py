@@ -5,6 +5,8 @@ from django.db.models import Sum, Q
 from django.contrib import messages
 from django.utils import timezone
 from .models import User, Profile, Event, EventBooking, Payment, Blog, Category
+import random
+import string
 from .forms import ProfileForm
 from django.contrib.auth.decorators import login_required as django_login_required
 
@@ -517,20 +519,61 @@ def event_list(request):
 def book_event(request, event_id):
     user = User.objects.get(id=request.session['user_id'])
     event = get_object_or_404(Event, id=event_id, is_approved=True)
-
-    # Prevent duplicate bookings
     if EventBooking.objects.filter(user=user, event=event).exists():
         messages.warning(request, "You have already booked this event.")
         return redirect('event_list')
-
-    EventBooking.objects.create(
+    booking = EventBooking.objects.create(
         user=user,
         event=event,
         booking_time=timezone.now(),
-        status='confirmed'  # ✅ Automatically confirmed
+        status='confirmed'
     )
-    messages.success(request, "Booking confirmed! See you at the event.")
-    return redirect('user_dashboard')
+    return redirect('booking_payment', booking_id=booking.id)
+
+def booking_payment(request, booking_id):
+    booking = get_object_or_404(EventBooking, id=booking_id, user_id=request.session['user_id'])
+    payment = Payment.objects.filter(booking=booking).first()
+    if payment:
+        return redirect('ticket_confirmation', booking_id=booking.id)
+    errors = {}
+    form_data = {}
+    if request.method == 'POST':
+        form_data = request.POST.dict()
+        cardholder = request.POST.get('cardholder', '').strip()
+        card_number = request.POST.get('card_number', '').strip()
+        expiry = request.POST.get('expiry', '').strip()
+        cvv = request.POST.get('cvv', '').strip()
+        payment_method = request.POST.get('payment_method', '').strip()
+        if not cardholder:
+            errors['cardholder'] = 'Cardholder name is required.'
+        if not card_number or not card_number.isdigit() or len(card_number) not in [15,16]:
+            errors['card_number'] = 'Enter a valid card number.'
+        if not expiry or not len(expiry) == 5 or expiry[2] != '/':
+            errors['expiry'] = 'Enter expiry as MM/YY.'
+        if not cvv or not cvv.isdigit() or len(cvv) not in [3,4]:
+            errors['cvv'] = 'Enter a valid CVV.'
+        if not payment_method:
+            errors['payment_method'] = 'Select a payment method.'
+        if not errors:
+            import random, string
+            ticket_code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
+            Payment.objects.create(
+                amount=0,
+                status='paid',
+                payment_method=payment_method,
+                payment_reference='MOCKPAY',
+                ticket_code=ticket_code,
+                booking=booking
+            )
+            return redirect('ticket_confirmation', booking_id=booking.id)
+    return render(request, 'booking_payment.html', {'booking': booking, 'errors': errors, 'form_data': form_data})
+
+def ticket_confirmation(request, booking_id):
+    booking = get_object_or_404(EventBooking, id=booking_id, user_id=request.session['user_id'])
+    payment = Payment.objects.filter(booking=booking).first()
+    if not payment:
+        return redirect('booking_payment', booking_id=booking.id)
+    return render(request, 'booking_ticket.html', {'booking': booking, 'payment': payment})
 
 @login_required
 def user_manage_bookings(request):
@@ -585,12 +628,9 @@ def profile_settings(request):
     return render(request, 'profile_settings.html', {'form': form})
 
 def event_detail(request, event_id):
-    event = get_object_or_404(Event, id=event_id, is_approved=True)
-    context = {
-        'event': event,
-        'user_is_logged_in': request.session.get('user_id') is not None,
-    }
-    return render(request, 'event_detail.html', context)
+    event = get_object_or_404(Event, id=event_id)
+    user_is_logged_in = bool(request.session.get('user_id'))
+    return render(request, 'event_detail.html', {'event': event, 'user_is_logged_in': user_is_logged_in})
 
 def blog_list(request):
     blogs = Blog.objects.filter(is_approved=True).order_by('-created_at')
