@@ -1,7 +1,7 @@
 import bcrypt
 from functools import wraps
 from django.shortcuts import render, redirect, get_object_or_404
-from django.db.models import Sum
+from django.db.models import Sum, Q
 from django.contrib import messages
 from django.utils import timezone
 from .models import User, Profile, Event, EventBooking, Payment, Blog, Category
@@ -29,13 +29,21 @@ def admin_required(view_func):
 
 def home(request):
     # Query featured and upcoming events (approved only)
+    search_query = request.GET.get('q', '').strip()
     featured_events = Event.objects.filter(
         is_approved=True,
         date__gte=timezone.now().date(),
-    ).order_by('date')[:6]  # limit to 3 for example
-    
+    )
+    if search_query:
+        featured_events = featured_events.filter(
+            Q(title__icontains=search_query) |
+            Q(city__icontains=search_query) |
+            Q(category__name__icontains=search_query)
+        )
+    featured_events = featured_events.order_by('date')[:6]
     context = {
         'featured_events': featured_events,
+        'search_query': search_query,
     }
     return render(request, 'home.html', context)
 

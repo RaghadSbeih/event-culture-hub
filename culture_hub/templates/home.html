@@ -14,9 +14,11 @@
                     <p class="lead mb-3 text-center" style="max-width:600px;">Explore a curated collection of cultural
                         events, historical sites, and social gatherings that celebrate the vibrant spirit of Palestine.
                     </p>
-                    <form class="d-flex bg-light rounded-pill p-2 shadow-sm w-100" style="max-width:420px;">
-                        <input type="text" class="form-control border-0 bg-transparent px-3"
-                            placeholder="Search for events, places, or categories">
+                    <form class="d-flex bg-light rounded-pill p-2 shadow-sm w-100" style="max-width:420px;" method="get"
+                        action=".">
+                        <input type="text" class="form-control border-0 bg-transparent px-3" name="q"
+                            placeholder="Search for events, places, or categories"
+                            value="{{ search_query|default:'' }}">
                         <button type="submit" class="btn btn-success rounded-pill ms-2 px-4">Search</button>
                     </form>
                 </div>
