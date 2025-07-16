@@ -639,11 +639,27 @@ def profile_settings(request):
         if form.is_valid():
             form.save()
             messages.success(request, 'Profile updated successfully.')
-            return redirect('profile_settings')
+            return redirect('user_profile')
     else:
         form = ProfileForm(instance=profile)
     
     return render(request, 'profile_settings.html', {'form': form})
+
+@login_required
+def user_profile(request):
+    user = User.objects.get(id=request.session['user_id'])
+    profile, created = Profile.objects.get_or_create(user=user)
+    user_bookings = EventBooking.objects.filter(user=user).select_related('event').order_by('-created_at')
+    context = {
+        'user': user,
+        'profile': profile,
+        'user_bookings': user_bookings,
+        'total_bookings': user_bookings.count(),
+        'confirmed_bookings': user_bookings.filter(status='confirmed').count(),
+        'pending_bookings': user_bookings.filter(status='pending').count(),
+        'cancelled_bookings': user_bookings.filter(status='cancelled').count(),
+    }
+    return render(request, 'user_profile.html', context)
 
 def event_detail(request, event_id):
     event = get_object_or_404(Event, id=event_id, is_approved=True)

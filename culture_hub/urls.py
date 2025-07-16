@@ -12,6 +12,7 @@ urlpatterns = [
     path('dashboard/route/', views.dashboard_route, name='dashboard_route'),
     path('admin/dashboard/', views.admin_dashboard, name='admin_dashboard'),
     path('organizer/dashboard/', views.organizer_dashboard, name='organizer_dashboard'),
+    path('profile/', views.user_profile, name='user_profile'),
     path('profile/settings/', views.profile_settings, name='profile_settings'),
     path("subscribe/", views.subscribe, name="subscribe"),
 
