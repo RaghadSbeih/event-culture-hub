@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-7 col-lg-6">
+            <div class="card shadow-lg border-0 rounded-4">
+                <div class="card-body">
+                    <h2 class="fw-bold mb-3 text-center">Payment</h2>
+                    <form method="post" autocomplete="off">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label">Cardholder Name</label>
+                            <input type="text" name="cardholder" class="form-control" required value="{{ form_data.cardholder|default:'' }}">
+                            {% if errors.cardholder %}<div class="text-danger small">{{ errors.cardholder }}</div>{% endif %}
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Card Number</label>
+                            <input type="text" name="card_number" class="form-control" required maxlength="16" value="{{ form_data.card_number|default:'' }}">
+                            {% if errors.card_number %}<div class="text-danger small">{{ errors.card_number }}</div>{% endif %}
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Expiry (MM/YY)</label>
+                                <input type="text" name="expiry" class="form-control" required maxlength="5" value="{{ form_data.expiry|default:'' }}">
+                                {% if errors.expiry %}<div class="text-danger small">{{ errors.expiry }}</div>{% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">CVV</label>
+                                <input type="text" name="cvv" class="form-control" required maxlength="4" value="{{ form_data.cvv|default:'' }}">
+                                {% if errors.cvv %}<div class="text-danger small">{{ errors.cvv }}</div>{% endif %}
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Payment Method</label>
+                            <select name="payment_method" class="form-select" required>
+                                <option value="">Select</option>
+                                <option value="Visa" {% if form_data.payment_method == 'Visa' %}selected{% endif %}>Visa</option>
+                                <option value="MasterCard" {% if form_data.payment_method == 'MasterCard' %}selected{% endif %}>MasterCard</option>
+                                <option value="Amex" {% if form_data.payment_method == 'Amex' %}selected{% endif %}>Amex</option>
+                                <option value="Mock" {% if form_data.payment_method == 'Mock' %}selected{% endif %}>Mock</option>
+                            </select>
+                            {% if errors.payment_method %}<div class="text-danger small">{{ errors.payment_method }}</div>{% endif %}
+                        </div>
+                        <button type="submit" class="btn btn-success w-100">Pay</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
