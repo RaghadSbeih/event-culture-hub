@@ -6,6 +6,7 @@
             <h1 class="text-center mb-4">Welcome, {{ user.username }}!</h1>
         </div>
     </div>
+
     {% if messages %}
     <div class="container mb-4">
         {% for message in messages %}
@@ -16,11 +17,12 @@
         {% endfor %}
     </div>
     {% endif %}
+
     {% if user.is_organizer %}
     <!-- Organizer Section -->
     <div class="row mt-2">
         <div class="col-12">
-            <div class="card border-0 shadow-sm" style="background: linear-gradient(135deg, #f6fff6 0%, #ecf5e7 100%);">
+            <div class="card border shadow-sm" style="background: linear-gradient(135deg, #f6fff6 0%, #ecf5e7 100%);">
                 <div class="card-header bg-transparent border-bottom d-flex justify-content-between align-items-center">
                     <h4 class="mb-0">Your Events as Organizer</h4>
                     <a href="{% url 'create_event' %}" class="btn btn-sm btn-success">Create New Event</a>
@@ -29,7 +31,7 @@
                     {% if organizer_events %}
                     <ul class="list-group">
                         {% for event in organizer_events %}
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <li class="list-group-item border d-flex justify-content-between align-items-center">
                             <div>
                                 <strong>{{ event.title }}</strong> — {{ event.date }} in {{ event.city }}<br>
                                 <small class="text-muted">
@@ -64,8 +66,8 @@
 
     <!-- Statistics Cards -->
     <div class="row mb-4 mt-4">
-        <div class="col-md-4 mb-3">
-            <div class="card h-100 border-0 shadow-sm"
+        <div class="col-md-4">
+            <div class="card h-100 border shadow-sm"
                 style="background: linear-gradient(135deg, #fafcf7 0%, #f0f4e6 100%); border-left: 4px solid #68752f !important;">
                 <div class="card-body text-center">
                     <h3 class="card-title text-success mb-2">{{ total_bookings }}</h3>
@@ -73,8 +75,8 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-4 mb-3">
-            <div class="card h-100 border-0 shadow-sm"
+        <div class="col-md-4">
+            <div class="card h-100 border shadow-sm"
                 style="background: linear-gradient(135deg, #fafcf7 0%, #f0f4e6 100%); border-left: 4px solid #28a745 !important;">
                 <div class="card-body text-center">
                     <h3 class="card-title text-success mb-2">{{ confirmed_bookings }}</h3>
@@ -82,8 +84,8 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-4 mb-3">
-            <div class="card h-100 border-0 shadow-sm"
+        <div class="col-md-4">
+            <div class="card h-100 border shadow-sm"
                 style="background: linear-gradient(135deg, #fafcf7 0%, #f0f4e6 100%); border-left: 4px solid #ffc107 !important;">
                 <div class="card-body text-center">
                     <h3 class="card-title text-warning mb-2">{{ pending_bookings }}</h3>
@@ -96,7 +98,7 @@
     <!-- Recent Bookings -->
     <div class="row">
         <div class="col-12">
-            <div class="card border-0 shadow-sm" style="background: linear-gradient(135deg, #fafcf7 0%, #f0f4e6 100%);">
+            <div class="card border shadow-sm" style="background: linear-gradient(135deg, #fafcf7 0%, #f0f4e6 100%);">
                 <div class="card-header bg-transparent border-bottom">
                     <h4 class="mb-0">Recent Bookings</h4>
                 </div>
@@ -149,7 +151,7 @@
     <!-- Quick Actions -->
     <div class="row mt-4 mb-4">
         <div class="col-12">
-            <div class="card border-0 shadow-sm" style="background: linear-gradient(135deg, #fafcf7 0%, #f0f4e6 100%);">
+            <div class="card border shadow-sm" style="background: linear-gradient(135deg, #fafcf7 0%, #f0f4e6 100%);">
                 <div class="card-header bg-transparent border-bottom">
                     <h4 class="mb-0">Quick Actions</h4>
                 </div>

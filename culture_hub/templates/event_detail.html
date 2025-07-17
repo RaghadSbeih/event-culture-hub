@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% block content %}
 <div class="container my-4">
+
     {% if messages %}
     <div class="container mb-4">
         {% for message in messages %}
@@ -15,6 +16,7 @@
     <div class="row gy-4">
         <!-- Left: Event Content -->
         <div class="col-lg-8">
+
             <!-- Event Poster -->
             <div class="mb-4">
                 {% if event.poster_image %}
@@ -30,24 +32,24 @@
             <!-- Event Details Card -->
             <div class="card border-0 shadow-sm">
                 <div class="card-body p-4">
-                    <h1 class="fw-bold mb-3">{{ event.title }}</h1>
+                    <h1 class="fw-bold fs-2 mb-4">{{ event.title }}</h1>
 
                     <div class="row mb-4">
                         <div class="col-md-6 mb-3 mb-md-0">
                             <div class="d-flex align-items-start">
-                                <i class="bi bi-calendar-event text-success me-2 fs-5"></i>
+                                <i class="bi bi-calendar-event text-success me-3 fs-4"></i>
                                 <div>
-                                    <small class="text-muted">Date</small>
-                                    <div class="fw-semibold">{{ event.date|date:"l, F d, Y" }}</div>
+                                    <div class="text-muted small">Date</div>
+                                    <div class="fw-semibold fs-5">{{ event.date|date:"l, F d, Y" }}</div>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="d-flex align-items-start">
-                                <i class="bi bi-clock text-primary me-2 fs-5"></i>
+                                <i class="bi bi-clock text-primary me-3 fs-4"></i>
                                 <div>
-                                    <small class="text-muted">Time</small>
-                                    <div class="fw-semibold">{{ event.start_time|time:"g:i A" }} – {{ event.end_time|time:"g:i A" }}</div>
+                                    <div class="text-muted small">Time</div>
+                                    <div class="fw-semibold fs-5">{{ event.start_time|time:"g:i A" }} – {{ event.end_time|time:"g:i A" }}</div>
                                 </div>
                             </div>
                         </div>
@@ -56,19 +58,19 @@
                     <div class="row mb-4">
                         <div class="col-md-6 mb-3 mb-md-0">
                             <div class="d-flex align-items-start">
-                                <i class="bi bi-geo-alt text-danger me-2 fs-5"></i>
+                                <i class="bi bi-geo-alt text-danger me-3 fs-4"></i>
                                 <div>
-                                    <small class="text-muted">Location</small>
-                                    <div class="fw-semibold">{{ event.location }}</div>
+                                    <div class="text-muted small">Location</div>
+                                    <div class="fw-semibold fs-5">{{ event.location }}</div>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="d-flex align-items-start">
-                                <i class="bi bi-building text-info me-2 fs-5"></i>
+                                <i class="bi bi-building text-info me-3 fs-4"></i>
                                 <div>
-                                    <small class="text-muted">City</small>
-                                    <div class="fw-semibold">{{ event.city }}</div>
+                                    <div class="text-muted small">City</div>
+                                    <div class="fw-semibold fs-5">{{ event.city }}</div>
                                 </div>
                             </div>
                         </div>
@@ -76,25 +78,25 @@
 
                     <div class="mb-4">
                         <div class="d-flex align-items-start">
-                            <i class="bi bi-tag text-warning me-2 fs-5"></i>
+                            <i class="bi bi-tag text-warning me-3 fs-4"></i>
                             <div>
-                                <small class="text-muted">Category</small>
-                                <div class="fw-semibold">{{ event.category.name }}</div>
+                                <div class="text-muted small">Category</div>
+                                <div class="fw-semibold fs-5">{{ event.category.name }}</div>
                             </div>
                         </div>
                     </div>
 
                     <div class="mb-4">
                         <h5 class="fw-bold mb-3">About This Event</h5>
-                        <p class="text-muted lh-lg">{{ event.description }}</p>
+                        <p class="text-muted fs-5 lh-lg">{{ event.description }}</p>
                     </div>
 
                     <div>
                         <div class="d-flex align-items-start">
-                            <i class="bi bi-person-circle text-secondary me-2 fs-5"></i>
+                            <i class="bi bi-person-circle text-secondary me-3 fs-4"></i>
                             <div>
-                                <small class="text-muted">Organized by</small>
-                                <div class="fw-semibold">{{ event.user.username }}</div>
+                                <div class="text-muted small">Organized by</div>
+                                <div class="fw-semibold fs-5">{{ event.user.username }}</div>
                             </div>
                         </div>
                     </div>
@@ -106,45 +108,45 @@
         <div class="col-lg-4">
             <div class="card border-0 shadow-sm sticky-top" style="top: 100px; z-index: 0;">
                 <div class="card-body p-4">
-                    <h5 class="fw-bold mb-3">Event Summary</h5>
+                    <h5 class="fw-bold mb-4 fs-4">Event Summary</h5>
 
-                    <div class="mb-3 d-flex justify-content-between">
+                    <div class="mb-3 d-flex justify-content-between fs-6">
                         <span class="text-muted">Date:</span>
                         <span class="fw-semibold">{{ event.date|date:"M d, Y" }}</span>
                     </div>
 
-                    <div class="mb-3 d-flex justify-content-between">
+                    <div class="mb-3 d-flex justify-content-between fs-6">
                         <span class="text-muted">Time:</span>
                         <span class="fw-semibold">{{ event.start_time|time:"g:i A" }}</span>
                     </div>
 
-                    <div class="mb-3 d-flex justify-content-between">
+                    <div class="mb-3 d-flex justify-content-between fs-6">
                         <span class="text-muted">City:</span>
                         <span class="fw-semibold">{{ event.city }}</span>
                     </div>
 
                     {% if event.is_ticketed %}
-                    <div class="alert alert-info mb-3 d-flex align-items-center">
+                    <div class="alert alert-info mb-4 d-flex align-items-center justify-content-center text-center">
                         <i class="bi bi-ticket-perforated me-2"></i>
-                        <strong>Ticketed Event</strong>
+                        <strong class="fs-6">Ticketed Event</strong>
                     </div>
                     {% endif %}
 
-                    <div class="d-grid gap-2 mt-4">
+                    <div class="d-grid gap-3 mt-4">
                         {% if user_is_logged_in %}
                         <form method="post" action="{% url 'book_event' event.id %}">
                             {% csrf_token %}
-                            <button type="submit" class="btn btn-success btn-lg w-100">
+                            <button type="submit" class="btn btn-success btn-lg">
                                 <i class="bi bi-calendar-check me-2"></i>Book This Event
                             </button>
                         </form>
                         {% else %}
-                        <a href="{% url 'login' %}" class="btn btn-outline-primary btn-lg w-100">
+                        <a href="{% url 'login' %}" class="btn btn-outline-primary btn-lg">
                             <i class="bi bi-box-arrow-in-right me-2"></i>Login to Book
                         </a>
                         {% endif %}
 
-                        <a href="{% url 'event_list' %}" class="btn btn-outline-secondary btn-lg w-100">
+                        <a href="{% url 'event_list' %}" class="btn btn-outline-secondary btn-lg">
                             <i class="bi bi-arrow-left me-2"></i>Back to Events
                         </a>
                     </div>
@@ -208,7 +210,7 @@
                             {% endif %}
                         </div>
                     </div>
-                    <div class="ps-1 mt-1 text-break" style="font-size: 1.08rem;">{{ comment.comment }}</div>
+                    <div class="ps-1 mt-1 text-break fs-6">{{ comment.comment }}</div>
                 </li>
                 {% endfor %}
             </ul>
