@@ -314,6 +314,20 @@
             border-radius: 12px;
             font-size: 1rem;
         }
+        .text-shadow {
+            text-shadow: 0 1px 3px rgba(0,0,0,0.4);
+        }
+        .text-shadow-lg {
+            text-shadow: 0 2px 6px rgba(0,0,0,0.6);
+        }
+        .hover-shadow:hover {
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15) !important;
+            transition: all 0.3s ease-in-out;
+        }
+        .transition {
+            transition: all 0.3s ease-in-out;
+        }
+
     </style>
     {% block extra_head %}{% endblock %}
 </head>
@@ -335,10 +349,10 @@
                 <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
                     <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
                     <li class="nav-item"><a class="nav-link" href="/events/">Events</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/about/">About</a></li>
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'blog_list' %}">Blogs</a>
                     </li>
+                    <li class="nav-item"><a class="nav-link" href="/about/">About</a></li>
                     {% if request.session.user_id %}
                     <li class="nav-item"><a class="nav-link" href="/dashboard/route/">Dashboard</a></li>
                     <li class="nav-item dropdown">
