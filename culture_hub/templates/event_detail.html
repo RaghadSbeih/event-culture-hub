@@ -134,22 +134,25 @@
 
                     <div class="d-grid gap-3 mt-4">
                         {% if user_is_logged_in %}
-                        <form method="post" action="{% url 'book_event' event.id %}">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-success btn-lg">
-                                <i class="bi bi-calendar-check me-2"></i>Book This Event
-                            </button>
-                        </form>
+                        <div>
+                            <form method="post" action="{% url 'book_event' event.id %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-success btn-lg w-100">
+                                    <i class="bi bi-calendar-check me-2"></i>Book This Event
+                                </button>
+                            </form>
+                        </div>
                         {% else %}
-                        <a href="{% url 'login' %}" class="btn btn-outline-primary btn-lg">
+                        <a href="{% url 'login' %}" class="btn btn-outline-primary btn-lg w-100">
                             <i class="bi bi-box-arrow-in-right me-2"></i>Login to Book
                         </a>
                         {% endif %}
 
-                        <a href="{% url 'event_list' %}" class="btn btn-outline-secondary btn-lg">
+                        <a href="{% url 'event_list' %}" class="btn btn-outline-secondary btn-lg w-100">
                             <i class="bi bi-arrow-left me-2"></i>Back to Events
                         </a>
                     </div>
+
                 </div>
             </div>
         </div>
