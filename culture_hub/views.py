@@ -11,6 +11,7 @@ from django.core.mail import send_mail
 from django.contrib.admin.views.decorators import staff_member_required
 from .forms import NewsletterForm
 from django.urls import reverse
+from django.http import JsonResponse
 
 # ──────────────── Decorators ──────────────── #
 
@@ -816,12 +817,27 @@ def delete_comment(request, comment_id):
 def subscribe(request):
     if request.method == "POST":
         email = request.POST.get("email")
-        if email and not NewsletterSubscriber.objects.filter(email=email).exists():
-            NewsletterSubscriber.objects.create(email=email)
-            messages.success(request, "You've been subscribed!")
+        if not email:
+            response = {"success": False, "message": "Email is required."}
+        elif NewsletterSubscriber.objects.filter(email=email).exists():
+            response = {"success": False, "message": "You're already subscribed."}
         else:
-            messages.warning(request, "You're already subscribed.")
-    return redirect(request.META.get("HTTP_REFERER", "/"))
+            NewsletterSubscriber.objects.create(email=email)
+            response = {"success": True, "message": "You've been subscribed!"}
+
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse(response)
+
+        # Fallback for non-AJAX POST
+        from django.contrib import messages
+        if response["success"]:
+            messages.success(request, response["message"])
+        else:
+            messages.warning(request, response["message"])
+        return redirect(request.META.get("HTTP_REFERER", "/"))
+
+    # If GET or other methods, just redirect home
+    return redirect("/")
 
 @staff_member_required
 def send_newsletter(request):
@@ -846,7 +862,6 @@ def send_newsletter(request):
     else:
         form = NewsletterForm()
     return render(request, "send_newsletter.html", {"form": form})
-
 
 def unsubscribe(request, token):
     try:
